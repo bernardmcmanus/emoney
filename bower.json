@@ -1,0 +1,25 @@
+{
+  "name": "emoney",
+  "version": "0.2.0",
+  "homepage": "https://github.com/elnarddogg/emoney.git",
+  "authors": [
+    "Bernard McManus"
+  ],
+  "description": "A lightweight event emitter for clients and servers",
+  "main": "dist/emoney-0.2.0.min.js",
+  "keywords": [
+    "javascript",
+    "event",
+    "emitter",
+    "client",
+    "server"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}

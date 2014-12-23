@@ -1,4 +1,4 @@
-emoney
-======
+E$
+==
 
-A lightweight event emitter for clients and servers
+> A lightweight event emitter for clients and servers
