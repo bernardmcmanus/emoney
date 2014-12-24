@@ -400,7 +400,7 @@
     });
   });
 
-  describe( '$listen' , function() {
+  describe( '$watch' , function() {
 
     it( 'should listen to any events emitted by subject' , function( done ) {
       
@@ -415,14 +415,14 @@
       var emitter2 = E$({ name: 'emitter2' });
       var emitter3 = E$({ name: 'emitter3' });
 
-      var listener = E$({
-        name: 'listener',
+      var watcher = E$({
+        name: 'watcher',
         handleE$: function( e ) {
           emitted[e.target.name].push( e.type );
         }
       });
       
-      listener.$listen([ emitter1 , emitter2 , emitter3 ]);
+      watcher.$watch([ emitter1 , emitter2 , emitter3 ]);
 
       E$.aggregate([ emitter1 , emitter2 , emitter3 ]).$emit( events );
 
@@ -437,15 +437,15 @@
 
   describe( '$ignore' , function() {
 
-    it( 'should stop listening to any events emitted by subject' , function( done ) {
+    it( 'should stop watching to any events emitted by subject' , function( done ) {
       
       var emitter1 = E$({ name: 'emitter1' });
       var emitter2 = E$({ name: 'emitter2' });
       var emitter3 = E$({ name: 'emitter3' });
-      var listener = E$({ name: 'listener' });
+      var watcher = E$({ name: 'watcher' });
       
-      listener.$listen([ emitter1 , emitter2 , emitter3 ]);
-      listener.$ignore([ emitter1 , emitter2 , emitter3 ]);
+      watcher.$watch([ emitter1 , emitter2 , emitter3 ]);
+      watcher.$ignore([ emitter1 , emitter2 , emitter3 ]);
 
       [
         emitter1,

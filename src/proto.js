@@ -23,7 +23,7 @@ function Proto() {
     construct( that );
   };
 
-  proto.$listen = function( emitters ) {
+  proto.$watch = function( emitters ) {
     var that = this;
     $_forEach( emitters , function( emitter ) {
       emitter.$when( $WILDCARD , that );

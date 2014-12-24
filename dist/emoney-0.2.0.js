@@ -1,4 +1,4 @@
-/*! emoney - 0.2.0 - Bernard McManus - master - 78d54cb - 2014-12-24 */
+/*! emoney - 0.2.0 - Bernard McManus - master - 529f55d - 2014-12-24 */
 
 (function() {
     "use strict";
@@ -506,7 +506,7 @@
         static$construct$$default( that );
       };
 
-      proto.$listen = function( emitters ) {
+      proto.$watch = function( emitters ) {
         var that = this;
         static$shared$$$_forEach( emitters , function( emitter ) {
           emitter.$when( static$constants$$$WILDCARD , that );
