@@ -125,7 +125,10 @@ export default {
 
       // eventList
       if (!i) {
-        parsed[0] = $_shift( args ) || (type == $DISPEL ? that.__events : $WILDCARD);
+        parsed[0] = $_shift( args ) || $_ensureArray( type != $WHEN ? that.__events : $WILDCARD );
+        if (type == $EMIT) {
+          parsed[0] = ($_length( parsed[0] ) == 1 && !$_indexOf( parsed[0] , $WILDCARD ) ? that.__events : parsed[0]);
+        }
       }
       
       // E$Handler / func

@@ -1,4 +1,4 @@
-/*! emoney - 0.2.0 - Bernard McManus - master - b5f1021 - 2014-12-24 */
+/*! emoney - 0.2.0 - Bernard McManus - master - 49de654 - 2014-12-24 */
 
 (function() {
     "use strict";
@@ -385,7 +385,10 @@
 
           // eventList
           if (!i) {
-            parsed[0] = static$shared$$$_shift( args ) || (type == static$constants$$$DISPEL ? that.__events : static$constants$$$WILDCARD);
+            parsed[0] = static$shared$$$_shift( args ) || static$shared$$$_ensureArray( type != static$constants$$$WHEN ? that.__events : static$constants$$$WILDCARD );
+            if (type == static$constants$$$EMIT) {
+              parsed[0] = (static$shared$$$_length( parsed[0] ) == 1 && !static$shared$$$_indexOf( parsed[0] , static$constants$$$WILDCARD ) ? that.__events : parsed[0]);
+            }
           }
           
           // E$Handler / func
