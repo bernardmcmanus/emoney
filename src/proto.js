@@ -39,12 +39,12 @@ function Proto() {
     return that;
   };
 
-  proto.$enq = function( task ) {
+  proto.$$enq = function( task ) {
     var that = this;
     that.__stack.push( task );
   };
 
-  proto.$flush = function() {
+  proto.$$flush = function() {
     
     var that = this;
     var stack = that.__stack;

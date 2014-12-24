@@ -1,4 +1,4 @@
-/*! emoney - 0.2.0 - Bernard McManus - master - 9f119fa - 2014-12-23 */
+/*! emoney - 0.2.0 - Bernard McManus - master - 78d54cb - 2014-12-24 */
 
 (function() {
     "use strict";
@@ -305,7 +305,7 @@
           };
         });
 
-        that.$flush();
+        that.$$flush();
 
         return that;
       },
@@ -313,7 +313,7 @@
       $when: function() {
         var that = this;
         that._$when( arguments );
-        that.$flush();
+        that.$$flush();
         return that;
       },
 
@@ -323,7 +323,7 @@
         var that = this;
         var parsed = that.__parse( static$constants$$$EMIT , arguments );
 
-        that.$enq(function() {
+        that.$$enq(function() {
           static$shared$$$_forEach( parsed[0] , function( type ) {
             if (type != static$constants$$$WILDCARD) {
               that.__invoke( type , parsed[1] , parsed[2] );
@@ -331,7 +331,7 @@
           });
         });
 
-        that.$flush();
+        that.$$flush();
 
         return that;
       },
@@ -343,13 +343,13 @@
         var parsed = that.__parse( static$constants$$$DISPEL , arguments );
         var func = static$shared$$$_getHandlerFunc( parsed[2] );
 
-        that.$enq(function() {
+        that.$$enq(function() {
           static$shared$$$_forEach( parsed[0] , function( type ) {
             that.__remove( type , func , !!parsed[1] );
           });
         });
 
-        that.$flush();
+        that.$$flush();
 
         return that;
       },
@@ -365,7 +365,7 @@
         var func = static$shared$$$_getHandlerFunc( parsed[2] );
         var context = static$shared$$$_getHandlerContext( parsed[2] , func );
 
-        that.$enq(function() {
+        that.$$enq(function() {
           static$shared$$$_forEach( parsed[0] , function( type , i ) {
             var evtHandler = that.__add( type , func , context , parsed[1] );
             callback( evtHandler );
@@ -522,12 +522,12 @@
         return that;
       };
 
-      proto.$enq = function( task ) {
+      proto.$$enq = function( task ) {
         var that = this;
         that.__stack.push( task );
       };
 
-      proto.$flush = function() {
+      proto.$$flush = function() {
         
         var that = this;
         var stack = that.__stack;

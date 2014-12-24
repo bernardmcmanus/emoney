@@ -45,7 +45,7 @@ export default {
       };
     });
 
-    that.$flush();
+    that.$$flush();
 
     return that;
   },
@@ -53,7 +53,7 @@ export default {
   $when: function() {
     var that = this;
     that._$when( arguments );
-    that.$flush();
+    that.$$flush();
     return that;
   },
 
@@ -63,7 +63,7 @@ export default {
     var that = this;
     var parsed = that.__parse( $EMIT , arguments );
 
-    that.$enq(function() {
+    that.$$enq(function() {
       $_forEach( parsed[0] , function( type ) {
         if (type != $WILDCARD) {
           that.__invoke( type , parsed[1] , parsed[2] );
@@ -71,7 +71,7 @@ export default {
       });
     });
 
-    that.$flush();
+    that.$$flush();
 
     return that;
   },
@@ -83,13 +83,13 @@ export default {
     var parsed = that.__parse( $DISPEL , arguments );
     var func = $_getHandlerFunc( parsed[2] );
 
-    that.$enq(function() {
+    that.$$enq(function() {
       $_forEach( parsed[0] , function( type ) {
         that.__remove( type , func , !!parsed[1] );
       });
     });
 
-    that.$flush();
+    that.$$flush();
 
     return that;
   },
@@ -105,7 +105,7 @@ export default {
     var func = $_getHandlerFunc( parsed[2] );
     var context = $_getHandlerContext( parsed[2] , func );
 
-    that.$enq(function() {
+    that.$$enq(function() {
       $_forEach( parsed[0] , function( type , i ) {
         var evtHandler = that.__add( type , func , context , parsed[1] );
         callback( evtHandler );
