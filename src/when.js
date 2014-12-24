@@ -6,7 +6,8 @@ import {
   $EMIT,
   $DISPEL,
   $FUNCTION,
-  $WILDCARD
+  $WILDCARD,
+  $DEFAULT_PREVENTED
 } from 'static/constants';
 import {
   $_length,
@@ -163,13 +164,14 @@ export default {
     var that = this;
     var handlers = that.__get( type , true );
     var evt = new Event( that , type );
-
-    callback = $_ensureFunc( callback );
     
     $_forEach( handlers , function( evtHandler ) {
-      evtHandler.after = callback;
       evtHandler.invoke( evt , args );
     });
+
+    if (!evt[$DEFAULT_PREVENTED]) {
+      $_ensureFunc( callback )( evt );
+    }
   },
 
   __add: function( type , func , context , args ) {

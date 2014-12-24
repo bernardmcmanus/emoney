@@ -1,4 +1,4 @@
-/*! emoney - 0.2.0 - Bernard McManus - master - 49de654 - 2014-12-24 */
+/*! emoney - 0.2.0 - Bernard McManus - master - d26e22e - 2014-12-24 */
 
 (function() {
     "use strict";
@@ -423,13 +423,14 @@
         var that = this;
         var handlers = that.__get( type , true );
         var evt = new event$$default( that , type );
-
-        callback = static$shared$$$_ensureFunc( callback );
         
         static$shared$$$_forEach( handlers , function( evtHandler ) {
-          evtHandler.after = callback;
           evtHandler.invoke( evt , args );
         });
+
+        if (!evt[static$constants$$$DEFAULT_PREVENTED]) {
+          static$shared$$$_ensureFunc( callback )( evt );
+        }
       },
 
       __add: function( type , func , context , args ) {

@@ -284,7 +284,7 @@
         arr.push( e.type );
         expect( e.defaultPrevented ).to.equal( false );
       });
-      expect( arr.length ).to.equal( events.length * 4 );
+      expect( arr.length ).to.equal( events.length * 3 );
       done();
     });
 
@@ -303,7 +303,7 @@
         arr.push( e.type );
         expect( e.defaultPrevented ).to.equal( false );
       });
-      expect( arr.length ).to.equal( events.length * 3 );
+      expect( arr.length ).to.equal( events.length * 2 );
       done();
     });
 
