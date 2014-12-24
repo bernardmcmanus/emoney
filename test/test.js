@@ -501,16 +501,16 @@
       });
     });
 
-    describe( '#isE$' , function() {
+    describe( '#is' , function() {
       
       it( 'should evaluate to true for an E$ instance' , function( done ) {
-        expect( E$.isE$( emoney )).to.equal( true );
+        expect( E$.is( emoney )).to.equal( true );
         done();
       });
 
       it( 'should evaluate to true for an E$ish instance' , function( done ) {
         var gnarly = new GNARLY();
-        expect( E$.isE$( gnarly )).to.equal( true );
+        expect( E$.is( gnarly )).to.equal( true );
         done();
       });
     });

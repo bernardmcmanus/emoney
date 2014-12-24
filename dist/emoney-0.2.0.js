@@ -1,4 +1,4 @@
-/*! emoney - 0.2.0 - Bernard McManus - master - 529f55d - 2014-12-24 */
+/*! emoney - 0.2.0 - Bernard McManus - master - b5f1021 - 2014-12-24 */
 
 (function() {
     "use strict";
@@ -580,7 +580,7 @@
     };
 
     main$$default[static$constants$$$PROTO] = static$shared$$$_defineProto( proto$$default );
-    main$$default.isE$ = static$is$emoney$$default;
+    main$$default.is = static$is$emoney$$default;
     main$$default.create = static$create$$default;
     main$$default.construct = static$construct$$default;
 

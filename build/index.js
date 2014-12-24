@@ -7,7 +7,7 @@ import { $PROTO } from 'static/constants';
 import { $_defineProto } from 'static/shared';
 
 E$[$PROTO] = $_defineProto( proto );
-E$.isE$ = isE$;
+E$.is = isE$;
 E$.create = create;
 E$.construct = construct;
 
