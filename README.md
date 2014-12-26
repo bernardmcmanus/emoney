@@ -304,16 +304,16 @@ Build & Test
 
 > Builds dev and prod releases, then runs tests.
 
-  grunt
+    grunt
 
 ### test
 
 > Builds dev release and then runs tests.
 
-  grunt test
+    grunt test
 
 ### debug
 
 > Builds dev release, runs tests, then watches source files for changes.
 
-  grunt debug
+    grunt debug
