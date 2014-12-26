@@ -93,10 +93,10 @@ var emoneyIsh = new E$ishConstructor();
 var somethingElse = new SomethingElse();
 
 emoney instanceof E$;     // true
-E$.is( emoney );      // true
+E$.is( emoney );          // true
 
 emoneyIsh instanceof E$;  // false
-E$.is( emoneyIsh );     // true
+E$.is( emoneyIsh );       // true
 
 E$.is( somethingElse );   // false
 ```
