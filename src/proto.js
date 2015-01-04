@@ -44,19 +44,29 @@ function Proto() {
     that.__stack.push( task );
   };
 
-  proto.$$flush = function() {
+  proto.$$flush = function( clear ) {
     
     var that = this;
     var stack = that.__stack;
+    var task;
 
-    if (that.__inprog) {
+    if (that.__inprog && !clear) {
       return;
     }
 
     that.__inprog = true;
 
     while ($_length( stack )) {
-      $_shift( stack )();
+      try {
+        task = $_shift( stack );
+        if (!clear) {
+          task();
+        }
+      }
+      catch( err ) {
+        that.$$flush( true );
+        throw err;
+      }
     }
     
     that.__inprog = false;

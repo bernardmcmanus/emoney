@@ -1,4 +1,4 @@
-/*! emoney - 0.2.1 - Bernard McManus - master - 4b8a95b - 2014-12-26 */
+/*! emoney - 0.2.2 - Bernard McManus - master - ge5124d - 2015-01-04 */
 
 (function() {
     "use strict";
@@ -531,19 +531,29 @@
         that.__stack.push( task );
       };
 
-      proto.$$flush = function() {
+      proto.$$flush = function( clear ) {
         
         var that = this;
         var stack = that.__stack;
+        var task;
 
-        if (that.__inprog) {
+        if (that.__inprog && !clear) {
           return;
         }
 
         that.__inprog = true;
 
         while (static$shared$$$_length( stack )) {
-          static$shared$$$_shift( stack )();
+          try {
+            task = static$shared$$$_shift( stack );
+            if (!clear) {
+              task();
+            }
+          }
+          catch( err ) {
+            that.$$flush( true );
+            throw err;
+          }
         }
         
         that.__inprog = false;

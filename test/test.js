@@ -87,6 +87,65 @@
     });
   });
 
+  describe( '$$enq' , function() {
+
+    it( 'should push a task to __stack' , function( done ) {
+      emoney.$$enq(function() {
+        // ...
+      });
+      expect( emoney.__stack.length ).to.equal( 1 );
+      emoney.$$flush();
+      done();
+    });
+  });
+
+  describe( '$$flush' , function() {
+
+    it( 'should sequentially execute tasks in __stack' , function( done ) {
+      
+      var result = [], count = 3;
+
+      for (var i = 0; i < count; i++) {
+        (function( i ) {
+          emoney.$$enq(function() {
+            var index = result.length;
+            result.push( index );
+            expect( result[i] ).to.equal( index );
+          });
+        }( i ));
+      }
+
+      expect( emoney.__stack.length ).to.equal( count );
+
+      emoney.$$flush();
+
+      expect( result.length ).to.equal( count );
+
+      done();
+    });
+
+    it( 'should clear the stack when an error is encountered' , function( done ) {
+      
+      var count = 5;
+
+      for (var i = 0; i < count; i++) {
+        (function( i ) {
+          emoney.$$enq(function() {
+            if (i < 4 && i > 1) {
+              throw new Error( 'test error ' + i );
+            }
+          });
+        }( i ));
+      }
+
+      expect( emoney.__stack.length ).to.equal( count );
+      expect(function(){ emoney.$$flush() }).to.throw( /test error 2/ );
+      expect( emoney.__stack.length ).to.equal( 0 );
+
+      done();
+    });
+  });
+
   describe( '#__add' , function() {
 
     it( 'should push to the handlers[type] array' , function( done ) {
