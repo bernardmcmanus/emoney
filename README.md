@@ -15,7 +15,7 @@ var emoneyStandalone = E$({
 
 var emoneyExtended = (function() {
 
-  function Constructor() {
+  function E$ishConstructor() {
     E$.construct( this );
   }
 
@@ -23,7 +23,7 @@ var emoneyExtended = (function() {
     handleE$: function( e ) { ... }
   });
 
-  return new Constructor();
+  return new E$ishConstructor();
 
 }());
 ```
