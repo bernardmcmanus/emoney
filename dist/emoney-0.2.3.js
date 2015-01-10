@@ -1,4 +1,4 @@
-/*! emoney - 0.2.2 - Bernard McManus - master - ge5124d - 2015-01-04 */
+/*! emoney - 0.2.3 - Bernard McManus - master - g75a578 - 2015-01-10 */
 
 (function() {
     "use strict";
