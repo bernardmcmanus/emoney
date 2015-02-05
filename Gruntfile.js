@@ -5,6 +5,7 @@ module.exports = function( grunt ) {
   var cp = require( 'child_process' );
   var util = require( 'util' );
   var colors = require( 'colors' );
+  var Promise = require( 'es6-promise' ).Promise;
   var AMDFormatter = require( 'es6-module-transpiler-amd-formatter' );
   var transpiler = require( 'es6-module-transpiler' );
   var Container = transpiler.Container;
@@ -232,10 +233,21 @@ module.exports = function( grunt ) {
 
   grunt.registerTask( 'runTests' , function() {
     var done = this.async();
-    cp.exec( 'npm test' , function( err , stdout , stderr ) {
-      util.puts( err ? err: stdout );
-      done();
-    });
+    new Promise(function( resolve ) {
+      var task = cp.spawn( 'npm' , [ 'test' ]);
+      resolve( task.stdout );
+    })
+    .then(function( readable ) {
+      readable.pipe( process.stdout );
+      return new Promise(function( resolve , reject ) {
+        readable.on( 'end' , resolve );
+        readable.on( 'error' , reject );
+      })
+      .catch(function( err ) {
+        return err;
+      });
+    })
+    .then( done );
   });
 
 
