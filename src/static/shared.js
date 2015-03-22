@@ -44,6 +44,7 @@ export function $_create( subject ) {
 }
 
 export function $_defineProperty( subject , property , descriptor ) {
+  descriptor.configurable = $_is( descriptor.configurable , 'boolean' ) ? descriptor.configurable : true;
   $Object.defineProperty( subject , property , descriptor );
 }
 
@@ -75,22 +76,8 @@ export function $_is( subject , test ) {
   return (typeof test == $STRING) ? (typeof subject == test) : (subject instanceof test);
 }
 
-/*export function $_has( subject , key ) {
-  return subject.hasOwnProperty( key );
-}*/
-
 export function $_ensureFunc( subject ) {
   return $_is( subject , $FUNCTION ) ? subject : function(){};
-}
-
-export function $_defineProto( proto ) {
-  var nonEnumerableProto = {};
-  for (var key in proto) {
-    $_defineProperty( nonEnumerableProto , key , {
-      value: proto[key]
-    });
-  }
-  return nonEnumerableProto;
 }
 
 export function $_getHandlerFunc( subject ) {

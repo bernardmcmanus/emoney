@@ -1,4 +1,4 @@
-/*! emoney - 0.2.3 - Bernard McManus - master - g75a578 - 2015-01-10 */
+/*! emoney - 0.2.4 - Bernard McManus - master - g3b5bc7 - 2015-03-22 */
 
 (function() {
     "use strict";
@@ -74,6 +74,7 @@
     }
 
     function static$shared$$$_defineProperty( subject , property , descriptor ) {
+      descriptor.configurable = static$shared$$$_is( descriptor.configurable , 'boolean' ) ? descriptor.configurable : true;
       static$constants$$$Object.defineProperty( subject , property , descriptor );
     }
 
@@ -107,16 +108,6 @@
 
     function static$shared$$$_ensureFunc( subject ) {
       return static$shared$$$_is( subject , static$constants$$$FUNCTION ) ? subject : function(){};
-    }
-
-    function static$shared$$$_defineProto( proto ) {
-      var nonEnumerableProto = {};
-      for (var key in proto) {
-        static$shared$$$_defineProperty( nonEnumerableProto , key , {
-          value: proto[key]
-        });
-      }
-      return nonEnumerableProto;
     }
 
     function static$shared$$$_getHandlerFunc( subject ) {
@@ -581,19 +572,14 @@
 
 
     var static$create$$default = function( subjectProto ) {
-
-      var extendedProto = static$shared$$$_defineProto(
-        static$shared$$$_create( proto$$default )
-      );
-
+      var extendedProto = static$shared$$$_create( proto$$default );
       for (var key in subjectProto) {
         extendedProto[key] = subjectProto[key];
       }
-
       return extendedProto;
     };
 
-    main$$default[static$constants$$$PROTO] = static$shared$$$_defineProto( proto$$default );
+    main$$default[static$constants$$$PROTO] = proto$$default;
     main$$default.is = static$is$emoney$$default;
     main$$default.create = static$create$$default;
     main$$default.construct = static$construct$$default;

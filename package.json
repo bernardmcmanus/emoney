@@ -1,8 +1,8 @@
 {
   "name": "emoney",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "A lightweight event emitter for clients and servers",
-  "main": "dist/emoney-0.2.3.min.js",
+  "main": "dist/emoney-0.2.4.min.js",
   "scripts": {
     "test": "mocha test/test.js"
   },

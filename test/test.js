@@ -61,32 +61,6 @@
     });
   });
 
-  describe( 'prototype' , function() {
-
-    it( 'should have no enumerable properties when E$ is created with constructor' , function( done ) {
-      var keys = [];
-      for (var key in emoney) {
-        keys.push( key );
-      }
-      expect( keys.length ).to.equal(
-        Object.keys( SEED ).length
-      );
-      done();
-    });
-    
-    it( 'should inherit no enumerable properties when E$ is created with E$.create / E$.construct' , function( done ) {
-      var emoneyIsh = new GNARLY();
-      var keys = [];
-      for (var key in emoneyIsh) {
-        keys.push( key );
-      }
-      expect( keys.length ).to.equal(
-        Object.keys( GNARLY.prototype ).length
-      );
-      done();
-    });
-  });
-
   describe( '$$enq' , function() {
 
     it( 'should push a task to __stack' , function( done ) {
