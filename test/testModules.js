@@ -1,10 +1,15 @@
-import { $WILDCARD } from 'static/constants';
-import EventHandler from 'eventHandler';
+import EventHandler from 'event-handler';
 import Event from 'event';
-
+import Stack from 'stack';
+import {
+  WILDCARD,
+  default as ListenerManager
+} from 'listener-manager';
 
 module.exports = {
-  $WILDCARD: $WILDCARD,
+  WILDCARD: WILDCARD,
   Event: Event,
-  EventHandler: EventHandler
+  EventHandler: EventHandler,
+  Stack: Stack,
+  ListenerManager: ListenerManager
 };

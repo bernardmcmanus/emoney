@@ -1,12 +1,12 @@
 {
   "name": "emoney",
-  "version": "0.2.4",
-  "homepage": "https://github.com/elnarddogg/emoney.git",
+  "version": "1.0.0",
+  "homepage": "https://github.com/elnarddogg/emoney",
   "authors": [
     "Bernard McManus"
   ],
   "description": "A lightweight event emitter for clients and servers",
-  "main": "dist/emoney-0.2.4.min.js",
+  "main": "dist/emoney.js",
   "keywords": [
     "javascript",
     "event",
@@ -19,7 +19,6 @@
     "**/.*",
     "node_modules",
     "bower_components",
-    "test",
-    "tests"
+    "test"
   ]
 }
