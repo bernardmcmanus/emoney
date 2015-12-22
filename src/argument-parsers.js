@@ -4,28 +4,26 @@ import { $_is, $_toArray } from 'helpers';
 
 export function whenParser( instance , _arguments , cb ){
   var args = $_toArray( _arguments ),
-    eventList = args.shift() || [ WILDCARD ],
+    eventTypes = args.shift() || WILDCARD,
     handlerFn = getHandlerFunc( lastIsFunctionOrEmoney( args ) ? args.pop() : instance ),
     handlerArgs = args[0];
-  cb( eventList , handlerArgs , handlerFn );
+  cb( eventTypes , handlerArgs , handlerFn );
 }
 
 export function emitParser( instance , _arguments , cb ){
   var args = $_toArray( _arguments ),
-    // eventList = args.shift() || instance.$__events,
-    eventList = args.shift() || [ WILDCARD ],
+    eventTypes = args.shift() || [],
     emitCb = (lastIsFunctionOrEmoney( args ) ? args.pop() : UNDEFINED),
     handlerArgs = args[0];
-  cb( eventList , handlerArgs , emitCb );
+  cb( eventTypes , handlerArgs , emitCb );
 }
 
 export function dispelParser( instance , _arguments , cb ){
   var args = $_toArray( _arguments ),
-    // eventList = args.shift() || instance.$__events,
-    eventList = args.shift() || [ WILDCARD ],
+    eventTypes = args.shift() || WILDCARD,
     handlerFn = getHandlerFunc( lastIsFunctionOrEmoney( args ) ? args.pop() : UNDEFINED ),
     wild = !!args[0];
-  cb( eventList , wild , handlerFn );
+  cb( eventTypes , wild , handlerFn );
 }
 
 function lastIsFunctionOrEmoney( args ){

@@ -1,17 +1,3 @@
-export var $_uts = (function(){
-  var last,
-    inc = 0.001;
-  return function $_uts(){
-    var now = Date.now();
-    last = (now === Math.floor( last ) ? last : now) + inc;
-    return last;
-  };
-}());
-
-export function $_void( value ){
-  return value;
-}
-
 export function $_defineProperties( subject , descriptors ){
   $_each( descriptors , function( descriptor , key ){
     descriptor.configurable = true;

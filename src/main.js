@@ -1,5 +1,4 @@
 import Event from 'event';
-import Stack from 'stack';
 import {
   WILDCARD,
   default as ListenerManager
@@ -7,7 +6,6 @@ import {
 import {
   $_toArray,
   $_is,
-  $_void,
   $_each,
   $_defineProperties
 } from 'helpers';
@@ -29,22 +27,17 @@ export default class E$ {
     return extendedProto;
   }
   static construct( instance ){
+    var listeners = new ListenerManager();
     $_defineProperties( instance , {
-      $__stack: { value: new Stack() },
-      $__listeners: { value: new ListenerManager() },
-      /*$__events: { get: function(){
-        return instance.$__listeners.keys;
-      }},*/
+      $__listeners: { value: listeners },
+      $__handleWild: { value: function(){
+        var args = $_toArray( arguments ),
+          evt = args.shift();
+        listeners.invoke( evt , args );
+      }},
       handleE$: {
-        value: (instance.handleE$ || $_void).bind( instance )
+        value: (instance.handleE$ || function(){}).bind( instance )
       },
-      _handleWild: {
-        value: function(){
-          var args = $_toArray( arguments ),
-            evt = args.shift();
-          instance.$__listeners.invoke( evt , args );
-        }
-      }
     });
   }
   constructor( seed ){
@@ -59,76 +52,62 @@ export default class E$ {
   }
   $watch( emitters ){
     var that = this;
-    emitters = $_is( emitters , Array ) ? emitters : [ emitters ];
+    emitters = [].concat( emitters );
     $_each( emitters , function( emitter , key ){
       emitter
         .$when( WILDCARD , that )
-        .$when( WILDCARD , that._handleWild );
+        .$when( WILDCARD , that.$__handleWild );
     });
     return that;
   }
   $unwatch( emitters ){
     var that = this;
-    emitters = $_is( emitters , Array ) ? emitters : [ emitters ];
+    emitters = [].concat( emitters );
     $_each( emitters , function( emitter ){
       emitter
         .$dispel( WILDCARD , true , that )
-        .$dispel( WILDCARD , true , that._handleWild );
+        .$dispel( WILDCARD , true , that.$__handleWild );
     });
     return that;
   }
   $once(){
-    var that = this;
-    whenParser( that , arguments , function( eventList , handlerArgs , handlerFn ){
-      that.$when( eventList , handlerArgs , function once(){
-        handlerFn.apply( UNDEFINED , arguments );
-        that.$dispel( eventList , true , once );
+    var that = this,
+      called;
+    whenParser( that , arguments , function( eventTypes , handlerArgs , handlerFn ){
+      that.$when( eventTypes , handlerArgs , function once(){
+        if (!called) {
+          called = true;
+          handlerFn.apply( UNDEFINED , arguments );
+          that.$dispel( eventTypes , true , once );
+        }
       });
     });
     return that;
   }
   $when(){
-    var that = this,
-      stack = that.$__stack;
-    whenParser( that , arguments , function( eventList , handlerArgs , handlerFn ){
-      stack.enqueue(function(){
-        $_each( eventList , function( type ){
-          that.$__listeners.add( type , handlerFn , handlerArgs );
-        });
-      });
-      stack.flush();
+    var that = this;
+    whenParser( that , arguments , function( eventTypes , handlerArgs , handlerFn ){
+      that.$__listeners.add( eventTypes , handlerFn , handlerArgs );
     });
     return that;
   }
   $emit(){
-    var that = this,
-      stack = that.$__stack;
-    emitParser( that , arguments , function( eventList , handlerArgs , emitCb ){
-      stack.enqueue(function(){
-        $_each( eventList , function( type ){
-          if (type != WILDCARD) {
-            var evt = new Event( that , type );
-            that.$__listeners.invoke( evt , handlerArgs );
-            if ($_is( emitCb , 'function' ) && !evt.defaultPrevented) {
-              emitCb.apply( UNDEFINED , [].concat( evt , handlerArgs ));
-            }
-          }
-        });
+    var that = this;
+    emitParser( that , arguments , function( eventTypes , handlerArgs , emitCb ){
+      $_each( eventTypes , function( type ){
+        var evt = new Event( that , type );
+        that.$__listeners.invoke( evt , handlerArgs );
+        if ($_is( emitCb , 'function' ) && !evt.defaultPrevented) {
+          emitCb.apply( UNDEFINED , [].concat( evt , handlerArgs ));
+        }
       });
-      stack.flush();
     });
     return that;
   }
   $dispel(){
-    var that = this,
-      stack = that.$__stack;
-    dispelParser( that , arguments , function( eventList , wild , handlerFn ){
-      stack.enqueue(function(){
-        $_each( eventList , function( type ){
-          that.$__listeners.remove( type , handlerFn , wild );
-        });
-      });
-      stack.flush();
+    var that = this;
+    dispelParser( that , arguments , function( eventTypes , wild , handlerFn ){
+      that.$__listeners.remove( eventTypes , handlerFn , wild );
     });
     return that;
   }

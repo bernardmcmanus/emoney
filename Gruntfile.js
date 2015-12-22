@@ -83,7 +83,6 @@ module.exports = function( grunt ) {
             'Array',
             'Object',
             'Date',
-            'Math',
             'Error',
             ['UNDEFINED']
           ];
@@ -171,7 +170,7 @@ module.exports = function( grunt ) {
     watch: {
       options: { interrupt: true },
       debug: {
-        files: 'src/**/*.js',
+        files: [ 'src/**/*.js' , 'test/!(*.compiled).js' ],
         tasks: [ 'test' ]
       }
     },

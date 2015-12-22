@@ -1,47 +1,19 @@
-import { $_uts } from 'helpers';
+import { WILDCARD } from 'listener-manager';
 
-export default function EventHandler( type , fn , bindArgs ){
+export default function EventHandler( types , fn , bindArgs ){
+  types = [].concat( types );
   bindArgs = (bindArgs != UNDEFINED ? bindArgs : []);
+  if (types.indexOf( WILDCARD ) >= 0 && types.length > 1) {
+    throw new Error( 'Wildcard event handlers cannot include other types.' );
+  }
   return {
-    type: type,
     fn: fn,
-    uts: $_uts(),
+    types: types,
     invoke: function( evt , invokeArgs ){
-      if (!evt.cancelBubble) {
+      if (!evt.cancelBubble && (types[0] == WILDCARD || types.indexOf( evt.type ) >= 0)) {
         invokeArgs = (invokeArgs != UNDEFINED ? invokeArgs : []);
         fn.apply( UNDEFINED , [].concat( evt , bindArgs , invokeArgs ));
       }
     }
   };
 }
-
-/*export default function EventHandler( fn , bindArgs ){
-  bindArgs = (bindArgs != UNDEFINED ? bindArgs : []);
-  return {
-    fn: fn,
-    uts: $_uts(),
-    invoke: function( evt , invokeArgs ){
-      if (!evt.cancelBubble) {
-        invokeArgs = (invokeArgs != UNDEFINED ? invokeArgs : []);
-        fn.apply( UNDEFINED , [].concat( evt , bindArgs , invokeArgs ));
-      }
-    }
-  };
-}*/
-
-/*export default class EventHandler {
-  static invoke( fn , evt , bindArgs , invokeArgs ){
-    fn.apply( UNDEFINED , [].concat( evt , bindArgs || [] , invokeArgs || [] ));
-  }
-  constructor( fn , bindArgs ){
-    var that = this;
-    that.fn = fn;
-    that.uts = $_uts();
-    that.bindArgs = bindArgs;
-  }
-  invoke( evt , invokeArgs ){
-    if (!evt.cancelBubble) {
-      EventHandler.invoke( this.fn , evt , this.bindArgs , invokeArgs );
-    }
-  }
-}*/
