@@ -43,17 +43,20 @@
   });
 
   describe( '#$when' , function(){
-    it( 'should add an event handler' , function( done ){
+    it( 'should add an event handler' , function(){
       emoney.$when( 'gnarly' , Test );
-      expect( emoney.$__listeners ).to.have.property( 'gnarly' );
-      expect( emoney.$__listeners.gnarly.length ).to.equal( 1 );
+      expect( emoney.$__listeners[0].fn ).to.equal( Test );
+      expect( emoney.$__listeners[0].type ).to.equal( 'gnarly' );
+      expect( emoney.$__listeners ).to.have.length( 1 );
       emoney.$dispel();
-      done();
+      expect( emoney.$__listeners ).to.have.length( 0 );
     });
     it( 'should use subject.handleE$ when handler is falsy' , function(){
       emoney.$when( 'rad' );
-      expect( emoney.$__listeners.rad[0].fn ).to.equal( emoney.handleE$ );
-      emoney.$dispel( 'rad' );
+      expect( emoney.$__listeners[0].fn ).to.equal( emoney.handleE$ );
+      expect( emoney.$__listeners[0].type ).to.equal( 'rad' );
+      emoney.$dispel();
+      expect( emoney.$__listeners ).to.have.length( 0 );
     });
     it( 'should use proper context when calling subject.handleE$' , function(){
       var emoney = E$({
@@ -65,7 +68,7 @@
         .$when( 'asdf' )
         .$emit( 'asdf' );
     });
-    it( 'should bind args to each event handler' , function( done ){
+    it( 'should bind args to each event handler' , function(){
       var arr = [];
       for (var i = 0; i < 10; i++) { arr.push( i ) }
       arr.forEach(function( i ) {
@@ -75,39 +78,38 @@
         });
       });
       emoney.$emit( 'rad' );
-      emoney.$dispel( 'rad' );
-      done();
+      emoney.$dispel();
+      expect( emoney.$__listeners ).to.have.length( 0 );
     });
-    it( 'should add a wildcard handler when event is falsy' , function( done ){
+    it( 'should add a wildcard handler when event is falsy' , function(){
       emoney.$when();
-      expect( emoney.$__listeners ).to.have.property( TestModules.WILDCARD );
+      expect( emoney.$__listeners[0].fn ).to.equal( emoney.handleE$ );
+      expect( emoney.$__listeners[0].type ).to.equal( TestModules.WILDCARD );
       emoney.$dispel( null , true );
-      done();
+      expect( emoney.$__listeners ).to.have.length( 0 );
     });
   });
 
   describe( '#$once' , function(){
     it( 'should remove an event handler after it is executed' , function(){
-      emoney.$once( 'gnarly' , function(){
-        expect( emoney.$__listeners ).to.have.property( 'gnarly' );
+      emoney.$once( 'gnarly' , function fn(){
+        expect( emoney.$__listeners[0].type ).to.equal( 'gnarly' );
       });
       emoney.$emit( 'gnarly' );
-      expect( emoney.$__listeners ).to.not.have.property( 'gnarly' );
+      expect( emoney.$__listeners ).to.have.length( 0 );
     });
     it( 'should only be executed for one event type in eventList' , function(){
       var eventList = [ 'gnarly' , 'rad' ];
       var result;
       emoney.$once( eventList , function( e ){
         result = e.type;
-        eventList.forEach(function( type ){
-          expect( emoney.$__listeners ).to.have.property( type );
+        eventList.forEach(function( type , i ){
+          expect( emoney.$__listeners[i].type ).to.equal( type );
         });
       });
       emoney.$emit( eventList[0] );
-      eventList.forEach(function( type ){
-        expect( emoney.$__listeners ).to.not.have.property( type );
-      });
       expect( result ).to.eql( eventList[0] );
+      expect( emoney.$__listeners ).to.have.length( 0 );
     });
     it( 'should bind args to each event handler' , function(){
       var arr = [];
@@ -230,23 +232,33 @@
   });
 
   describe( '#$dispel' , function(){
-    it( 'should remove an event handler' , function( done ){
-      emoney.$when( 'gnarly' , Test );
-      emoney.$dispel( 'gnarly' , Test );
-      expect( emoney.$__listeners ).to.not.have.property( 'gnarly' );
-      done();
+    before(function(){
+      expect( emoney.$__listeners ).to.have.length( 0 );
     });
-    it( 'should remove all event handlers if no arguments are passed' , function( done ){
+    it( 'should remove an event handler' , function(){
+      emoney.$when( 'gnarly' , Test );
+      expect( emoney.$__listeners ).to.have.length( 1 );
+      emoney.$dispel( 'gnarly' , Test );
+      // expect( emoney.$__listeners ).to.not.have.property( 'gnarly' );
+      expect( emoney.$__listeners ).to.have.length( 0 );
+    });
+    it( 'should remove all event handlers if no arguments are passed' , function(){
       emoney.$when( 'gnarly' , Test );
       emoney.$when( 'rad' , Test );
-      expect( emoney.$__listeners.gnarly.length ).to.equal( 1 );
-      expect( emoney.$__listeners.rad.length ).to.equal( 1 );
+      // expect( emoney.$__listeners.gnarly.length ).to.equal( 1 );
+      // expect( emoney.$__listeners.rad.length ).to.equal( 1 );
+      expect( emoney.$__listeners ).to.have.length( 2 );
+      expect( emoney.$__listeners[0].type ).to.equal( 'gnarly' );
+      expect( emoney.$__listeners[0].fn ).to.equal( Test );
+      expect( emoney.$__listeners[1].type ).to.equal( 'rad' );
+      expect( emoney.$__listeners[1].fn ).to.equal( Test );
       emoney.$dispel();
-      expect( emoney.$__listeners ).to.not.have.property( 'gnarly' );
-      expect( emoney.$__listeners ).to.not.have.property( 'rad' );
-      done();
+      // expect( emoney.$__listeners ).to.not.have.property( 'gnarly' );
+      // expect( emoney.$__listeners ).to.not.have.property( 'rad' );
+      expect( emoney.$__listeners ).to.have.length( 0 );
     });
-    it( 'should remove all handlers matched by func when event type is falsy' , function( done ){
+return;
+    it( 'should remove all handlers matched by func when event type is falsy' , function(){
       emoney
         .$when([ 'gnarly' , 'rad' ] , Test )
         .$when([ 'gnarly' , 'rad' ] , Test2 );
@@ -258,7 +270,6 @@
       emoney.$dispel();
       expect( emoney.$__listeners ).to.not.have.property( 'gnarly' );
       expect( emoney.$__listeners ).to.not.have.property( 'rad' );
-      done();
     });
     it( 'should not remove wildcard handlers if wild is falsy' , function( done ){
       emoney.$when( TestModules.WILDCARD );
@@ -272,6 +283,7 @@
       done();
     });
   });
+return;
 
   describe( '#$watch' , function(){
     it( 'should listen to any events emitted by subject' , function(){

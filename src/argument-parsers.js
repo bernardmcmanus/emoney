@@ -12,7 +12,8 @@ export function whenParser( instance , _arguments , cb ){
 
 export function emitParser( instance , _arguments , cb ){
   var args = $_toArray( _arguments ),
-    eventList = args.shift() || instance.$__events,
+    // eventList = args.shift() || instance.$__events,
+    eventList = args.shift() || [ WILDCARD ],
     emitCb = (lastIsFunctionOrEmoney( args ) ? args.pop() : UNDEFINED),
     handlerArgs = args[0];
   cb( eventList , handlerArgs , emitCb );
@@ -20,7 +21,8 @@ export function emitParser( instance , _arguments , cb ){
 
 export function dispelParser( instance , _arguments , cb ){
   var args = $_toArray( _arguments ),
-    eventList = args.shift() || instance.$__events,
+    // eventList = args.shift() || instance.$__events,
+    eventList = args.shift() || [ WILDCARD ],
     handlerFn = getHandlerFunc( lastIsFunctionOrEmoney( args ) ? args.pop() : UNDEFINED ),
     wild = !!args[0];
   cb( eventList , wild , handlerFn );

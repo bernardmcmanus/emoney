@@ -32,9 +32,9 @@ export default class E$ {
     $_defineProperties( instance , {
       $__stack: { value: new Stack() },
       $__listeners: { value: new ListenerManager() },
-      $__events: { get: function(){
+      /*$__events: { get: function(){
         return instance.$__listeners.keys;
-      }},
+      }},*/
       handleE$: {
         value: (instance.handleE$ || $_void).bind( instance )
       },

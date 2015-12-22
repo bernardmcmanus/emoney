@@ -1,75 +1,47 @@
 import EventHandler from 'event-handler';
 import {
   $_each,
-  $_defineProperties
+  // $_defineProperties
 } from 'helpers';
 
 export const WILDCARD = '*';
 
-export default class ListenerManager {
-  constructor(){
-    var that = this;
-    $_defineProperties( that , {
-      keys: { get: function(){
-        return Object.keys( that );
-      }}
-    });
-  }
-  /*_has( type ){
-    return this.keys.indexOf( type ) >= 0;
-  }*/
-  add( type , fn , args ){
-    var that = this,
-      evtHandler = new EventHandler( fn , args ),
-      handlerArray = that._get( type );
-    handlerArray.push( evtHandler );
-    that[type] = handlerArray;
-  }
-  _get( eventType , wild ){
-    var that = this,
-      subset = that;
-    if (eventType) {
-      subset = subset[eventType] || [];
-      if (wild && eventType != WILDCARD) {
-        subset = that._get( WILDCARD ).concat( subset ).sort(function( a , b ){
-          return a.uts - b.uts;
-        });
-      }
-    }
-    return subset;
-  }
-  invoke( evt , args ){
-    var handlerArray = this._get( evt.type , true );
-    $_each( handlerArray , function( evtHandler ){
-      evtHandler.invoke( evt , args );
-    });
-  }
-  remove( type , fn , wild ){
-    var that = this,
-      handlerArray = that._get( type ),
-      i = 0,
-      index,
-      evtHandler;
-    while (i < handlerArray.length) {
-      index = (fn ? indexOfHandler( handlerArray , fn ) : i);
-      if (index >= 0 && (wild || type != WILDCARD)) {
-        handlerArray.splice( index , 1 );
-        i--;
-      }
-      i++;
-    }
-    if (!handlerArray.length) {
-      delete that[type];
-    }
-    else {
-      that[type] = handlerArray;
-    }
-  }
+export default function ListenerManager(){
+  Array.call( this );
 }
 
-function indexOfHandler( handlerArray , fn ){
-  var arr = handlerArray.map(function( evtHandler ){
-    return evtHandler.fn;
+ListenerManager.prototype = Object.create( Array.prototype );
+
+ListenerManager.prototype.constructor = ListenerManager;
+
+ListenerManager.prototype.add = function( type , fn , args ){
+  this.push(
+    new EventHandler( type , fn , args )
+  );
+};
+
+ListenerManager.prototype.invoke = function( evt , args ){
+  $_each( this , function( evtHandler ){
+    if (evtHandler.type == evt.type || evtHandler.type == WILDCARD) {
+      evtHandler.invoke( evt , args );
+    }
   });
-  return arr.indexOf( fn );
-}
+};
+
+ListenerManager.prototype.remove = function( type , fn , wild ){
+  var that = this,
+    i = 0,
+    len = that.length,
+    evtHandler;
+  while (i < len) {
+    evtHandler = that[i];
+    if ((wild || type == evtHandler.type || type == WILDCARD) && (!fn || evtHandler.fn == fn)) {
+      that.splice( i , 1 );
+      i--;
+      len--;
+    }
+    i++;
+  }
+};
+
+

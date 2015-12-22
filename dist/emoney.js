@@ -1,4 +1,4 @@
-/*! emoney - 1.0.0 - Bernard McManus - af590a7 - 2015-12-21 */
+/*! emoney - 1.0.0 - Bernard McManus - efba454 - 2015-12-21 */
 
 (function($global,Array,Object,Date,Math,Error,UNDEFINED){
 "use strict";
@@ -67,21 +67,18 @@ exports.default = EventHandler;
 var _helpers = _dereq_('helpers');
 
 function EventHandler(fn, bindArgs) {
+  bindArgs = bindArgs != UNDEFINED ? bindArgs : [];
   return {
     fn: fn,
     uts: (0, _helpers.$_uts)(),
     invoke: function invoke(evt, invokeArgs) {
       if (!evt.cancelBubble) {
-        // invoke( fn , evt , bindArgs , invokeArgs );
-        fn.apply(UNDEFINED, [].concat(evt, bindArgs || [], invokeArgs || []));
+        invokeArgs = invokeArgs != UNDEFINED ? invokeArgs : [];
+        fn.apply(UNDEFINED, [].concat(evt, bindArgs, invokeArgs));
       }
     }
   };
 }
-
-/*function invoke( fn , evt , bindArgs , invokeArgs ){
-  fn.apply( UNDEFINED , [].concat( evt , bindArgs || [] , invokeArgs || [] ));
-}*/
 
 /*export default class EventHandler {
   static invoke( fn , evt , bindArgs , invokeArgs ){
@@ -237,10 +234,6 @@ var _eventHandler = _dereq_('event-handler');
 
 var _eventHandler2 = _interopRequireDefault(_eventHandler);
 
-var _event = _dereq_('event');
-
-var _event2 = _interopRequireDefault(_event);
-
 var _helpers = _dereq_('helpers');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -272,7 +265,6 @@ var ListenerManager = (function () {
           handlerArray = that._get(type);
       handlerArray.push(evtHandler);
       that[type] = handlerArray;
-      // return evtHandler;
     }
   }, {
     key: '_get',
@@ -291,13 +283,11 @@ var ListenerManager = (function () {
     }
   }, {
     key: 'invoke',
-    value: function invoke(target, type, args) {
-      var handlerArray = this._get(type, true),
-          evt = new _event2.default(target, type);
+    value: function invoke(evt, args) {
+      var handlerArray = this._get(evt.type, true);
       (0, _helpers.$_each)(handlerArray, function (evtHandler) {
         evtHandler.invoke(evt, args);
       });
-      return evt;
     }
   }, {
     key: 'remove',
@@ -335,7 +325,7 @@ function indexOfHandler(handlerArray, fn) {
   return arr.indexOf(fn);
 }
 
-},{"event":3,"event-handler":2,"helpers":4}],7:[function(_dereq_,module,exports){
+},{"event-handler":2,"helpers":4}],7:[function(_dereq_,module,exports){
 'use strict';
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
@@ -343,6 +333,10 @@ var _createClass = (function () { function defineProperties(target, props) { for
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+
+var _event = _dereq_('event');
+
+var _event2 = _interopRequireDefault(_event);
 
 var _stack = _dereq_('stack');
 
@@ -386,6 +380,13 @@ var E$ = (function () {
           } },
         handleE$: {
           value: (instance.handleE$ || _helpers.$_void).bind(instance)
+        },
+        _handleWild: {
+          value: function value() {
+            var args = (0, _helpers.$_toArray)(arguments),
+                evt = args.shift();
+            instance.$__listeners.invoke(evt, args);
+          }
         }
       });
     }
@@ -410,17 +411,17 @@ var E$ = (function () {
       var that = this;
       emitters = (0, _helpers.$_is)(emitters, Array) ? emitters : [emitters];
       (0, _helpers.$_each)(emitters, function (emitter, key) {
-        emitter.$when(_listenerManager.WILDCARD, that);
+        emitter.$when(_listenerManager.WILDCARD, that).$when(_listenerManager.WILDCARD, that._handleWild);
       });
       return that;
     }
   }, {
-    key: '$ignore',
-    value: function $ignore(emitters) {
+    key: '$unwatch',
+    value: function $unwatch(emitters) {
       var that = this;
       emitters = (0, _helpers.$_is)(emitters, Array) ? emitters : [emitters];
       (0, _helpers.$_each)(emitters, function (emitter) {
-        emitter.$dispel(_listenerManager.WILDCARD, true, that);
+        emitter.$dispel(_listenerManager.WILDCARD, true, that).$dispel(_listenerManager.WILDCARD, true, that._handleWild);
       });
       return that;
     }
@@ -436,26 +437,6 @@ var E$ = (function () {
       });
       return that;
     }
-    /*$once(){
-      var that = this,
-        _arguments = arguments;
-      whenParser( that , _arguments , function( eventList ){
-        that._$when( _arguments , function( evtHandler ){
-          evtHandler.before = function( evt , fn ){
-            that.$dispel( eventList , true , fn );
-          };
-        });
-        that.$__stack.flush();
-      });
-      return that;
-    }*/
-    /*$when(){
-      var that = this;
-      that._$when( arguments );
-      that.$__stack.flush();
-      return that;
-    }*/
-
   }, {
     key: '$when',
     value: function $when() {
@@ -480,9 +461,9 @@ var E$ = (function () {
         stack.enqueue(function () {
           (0, _helpers.$_each)(eventList, function (type) {
             if (type != _listenerManager.WILDCARD) {
-              var evt = that.$__listeners.invoke(that, type, handlerArgs);
+              var evt = new _event2.default(that, type);
+              that.$__listeners.invoke(evt, handlerArgs);
               if ((0, _helpers.$_is)(emitCb, 'function') && !evt.defaultPrevented) {
-                // emitCb( evt );
                 emitCb.apply(UNDEFINED, [].concat(evt, handlerArgs));
               }
             }
@@ -507,20 +488,6 @@ var E$ = (function () {
       });
       return that;
     }
-    /*_$when( _arguments , cb ){
-      var that = this;
-      whenParser( that , _arguments , function( eventList , handlerArgs , handlerFn ){
-        that.$__stack.enqueue(function(){
-          $_each( eventList , function( type ){
-            var evtHandler = that.$__listeners.add( type , handlerFn , handlerArgs );
-            if (cb) {
-              cb( evtHandler );
-            }
-          });
-        });
-      });
-    }*/
-
   }]);
 
   return E$;
@@ -528,7 +495,7 @@ var E$ = (function () {
 
 exports.default = E$;
 
-},{"argument-parsers":1,"helpers":4,"listener-manager":6,"stack":8}],8:[function(_dereq_,module,exports){
+},{"argument-parsers":1,"event":3,"helpers":4,"listener-manager":6,"stack":8}],8:[function(_dereq_,module,exports){
 "use strict";
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
