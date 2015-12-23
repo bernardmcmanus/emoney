@@ -1,4 +1,4 @@
-/*! emoney - 1.0.0 - Bernard McManus - 97f8ff1 - 2015-12-22 */
+/*! emoney - 1.0.0 - Bernard McManus - 4429d46 - 2015-12-23 */
 
 (function($global,Array,Object,Date,Error,UNDEFINED){
 "use strict";
@@ -26,25 +26,25 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function whenParser(instance, _arguments, cb) {
   var args = (0, _helpers.$_toArray)(_arguments),
       eventTypes = args.shift() || _listenerManager.WILDCARD,
-      handlerFn = getHandlerFunc(lastIsFunctionOrEmoney(args) ? args.pop() : instance),
-      handlerArgs = args[0];
-  cb(eventTypes, handlerArgs, handlerFn);
+      listenerFn = getListenerFunc(lastIsFunctionOrEmoney(args) ? args.pop() : instance),
+      listenerArgs = args[0];
+  cb(eventTypes, listenerArgs, listenerFn);
 }
 
 function emitParser(instance, _arguments, cb) {
   var args = (0, _helpers.$_toArray)(_arguments),
       eventTypes = args.shift() || [],
       emitCb = lastIsFunctionOrEmoney(args) ? args.pop() : UNDEFINED,
-      handlerArgs = args[0];
-  cb(eventTypes, handlerArgs, emitCb);
+      listenerArgs = args[0];
+  cb(eventTypes, listenerArgs, emitCb);
 }
 
 function dispelParser(instance, _arguments, cb) {
   var args = (0, _helpers.$_toArray)(_arguments),
       eventTypes = args.shift() || _listenerManager.WILDCARD,
-      handlerFn = getHandlerFunc(lastIsFunctionOrEmoney(args) ? args.pop() : UNDEFINED),
+      listenerFn = getListenerFunc(lastIsFunctionOrEmoney(args) ? args.pop() : UNDEFINED),
       wild = !!args[0];
-  cb(eventTypes, wild, handlerFn);
+  cb(eventTypes, wild, listenerFn);
 }
 
 function lastIsFunctionOrEmoney(args) {
@@ -52,7 +52,7 @@ function lastIsFunctionOrEmoney(args) {
   return (0, _helpers.$_is)(last, 'function') || _main2.default.is(last);
 }
 
-function getHandlerFunc(subject) {
+function getListenerFunc(subject) {
   return subject && subject.handleE$ || subject;
 }
 
@@ -62,24 +62,22 @@ function getHandlerFunc(subject) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = EventHandler;
+exports.default = EventListener;
 
 var _listenerManager = _dereq_('listener-manager');
 
-function EventHandler(types, fn, bindArgs) {
+function EventListener(types, fn, bindArgs) {
   types = [].concat(types);
   bindArgs = bindArgs != UNDEFINED ? bindArgs : [];
   if (types.indexOf(_listenerManager.WILDCARD) >= 0 && types.length > 1) {
-    throw new Error('Wildcard event handlers cannot include other types.');
+    throw new Error('Wildcard listeners cannot include other types.');
   }
-  return {
-    fn: fn,
-    types: types,
-    invoke: function invoke(evt, invokeArgs) {
-      if (!evt.cancelBubble && (types[0] == _listenerManager.WILDCARD || types.indexOf(evt.type) >= 0)) {
-        invokeArgs = invokeArgs != UNDEFINED ? invokeArgs : [];
-        fn.apply(UNDEFINED, [].concat(evt, bindArgs, invokeArgs));
-      }
+  this.fn = fn;
+  this.types = types;
+  this.invoke = function (evt, invokeArgs) {
+    if (!evt.cancelBubble && (types[0] == _listenerManager.WILDCARD || types.indexOf(evt.type) >= 0)) {
+      invokeArgs = invokeArgs != UNDEFINED ? invokeArgs : [];
+      fn.apply(UNDEFINED, [].concat(evt, bindArgs, invokeArgs));
     }
   };
 }
@@ -204,13 +202,13 @@ Object.defineProperty(exports, "__esModule", {
 exports.WILDCARD = undefined;
 exports.default = ListenerManager;
 
+var _eventListener = _dereq_('event-listener');
+
+var _eventListener2 = _interopRequireDefault(_eventListener);
+
 var _stack = _dereq_('stack');
 
 var _stack2 = _interopRequireDefault(_stack);
-
-var _eventHandler = _dereq_('event-handler');
-
-var _eventHandler2 = _interopRequireDefault(_eventHandler);
 
 var _helpers = _dereq_('helpers');
 
@@ -218,33 +216,31 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var WILDCARD = exports.WILDCARD = '*';
 
+function enqueue(fn) {
+  _stack2.default.enqueue(fn);
+  _stack2.default.flush();
+}
+
 function ListenerManager() {
   Array.call(this);
-  this.stack = new _stack2.default();
 }
 
 ListenerManager.prototype = Object.create(Array.prototype);
 
 ListenerManager.prototype.constructor = ListenerManager;
 
-ListenerManager.prototype._enqueue = function (fn) {
-  var stack = this.stack;
-  stack.enqueue(fn);
-  stack.flush();
-};
-
 ListenerManager.prototype.add = function (types, fn, args) {
   var that = this;
-  that._enqueue(function () {
-    that.push(new _eventHandler2.default(types, fn, args));
+  enqueue(function () {
+    that.push(new _eventListener2.default(types, fn, args));
   });
 };
 
 ListenerManager.prototype.invoke = function (evt, args) {
   var that = this;
-  that._enqueue(function () {
-    that.forEach(function (evtHandler) {
-      evtHandler.invoke(evt, args);
+  enqueue(function () {
+    that.forEach(function (evtListener) {
+      evtListener.invoke(evt, args);
     });
   });
 };
@@ -252,17 +248,17 @@ ListenerManager.prototype.invoke = function (evt, args) {
 ListenerManager.prototype.remove = function (removeTypes, fn, wild) {
   var that = this;
   removeTypes = [].concat(removeTypes);
-  that._enqueue(function () {
+  enqueue(function () {
     (0, _helpers.$_each)(removeTypes, function (removeType) {
       var len = that.length,
           i = 0,
-          evtHandler,
+          evtListener,
           handleTypes,
           index;
       while (i < len) {
-        evtHandler = that[i];
-        if (!fn || evtHandler.fn == fn) {
-          handleTypes = evtHandler.types;
+        evtListener = that[i];
+        if (!fn || evtListener.fn == fn) {
+          handleTypes = evtListener.types;
           index = handleTypes.indexOf(removeType);
           if (index >= 0 && removeType != WILDCARD) {
             handleTypes.splice(index, 1);
@@ -279,7 +275,7 @@ ListenerManager.prototype.remove = function (removeTypes, fn, wild) {
   });
 };
 
-},{"event-handler":2,"helpers":4,"stack":8}],7:[function(_dereq_,module,exports){
+},{"event-listener":2,"helpers":4,"stack":8}],7:[function(_dereq_,module,exports){
 'use strict';
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
@@ -375,11 +371,11 @@ var E$ = (function () {
     value: function $once() {
       var that = this,
           called;
-      (0, _argumentParsers.whenParser)(that, arguments, function (eventTypes, handlerArgs, handlerFn) {
-        that.$when(eventTypes, handlerArgs, function once() {
+      (0, _argumentParsers.whenParser)(that, arguments, function (eventTypes, listenerArgs, listenerFn) {
+        that.$when(eventTypes, listenerArgs, function once() {
           if (!called) {
             called = true;
-            handlerFn.apply(UNDEFINED, arguments);
+            listenerFn.apply(UNDEFINED, arguments);
             that.$dispel(eventTypes, true, once);
           }
         });
@@ -390,8 +386,8 @@ var E$ = (function () {
     key: '$when',
     value: function $when() {
       var that = this;
-      (0, _argumentParsers.whenParser)(that, arguments, function (eventTypes, handlerArgs, handlerFn) {
-        that.$__listeners.add(eventTypes, handlerFn, handlerArgs);
+      (0, _argumentParsers.whenParser)(that, arguments, function (eventTypes, listenerArgs, listenerFn) {
+        that.$__listeners.add(eventTypes, listenerFn, listenerArgs);
       });
       return that;
     }
@@ -399,12 +395,12 @@ var E$ = (function () {
     key: '$emit',
     value: function $emit() {
       var that = this;
-      (0, _argumentParsers.emitParser)(that, arguments, function (eventTypes, handlerArgs, emitCb) {
+      (0, _argumentParsers.emitParser)(that, arguments, function (eventTypes, listenerArgs, emitCb) {
         (0, _helpers.$_each)(eventTypes, function (type) {
           var evt = new _event2.default(that, type);
-          that.$__listeners.invoke(evt, handlerArgs);
+          that.$__listeners.invoke(evt, listenerArgs);
           if ((0, _helpers.$_is)(emitCb, 'function') && !evt.defaultPrevented) {
-            emitCb.apply(UNDEFINED, [].concat(evt, handlerArgs));
+            emitCb.apply(UNDEFINED, [].concat(evt, listenerArgs));
           }
         });
       });
@@ -414,8 +410,8 @@ var E$ = (function () {
     key: '$dispel',
     value: function $dispel() {
       var that = this;
-      (0, _argumentParsers.dispelParser)(that, arguments, function (eventTypes, wild, handlerFn) {
-        that.$__listeners.remove(eventTypes, handlerFn, wild);
+      (0, _argumentParsers.dispelParser)(that, arguments, function (eventTypes, wild, listenerFn) {
+        that.$__listeners.remove(eventTypes, listenerFn, wild);
       });
       return that;
     }
@@ -429,77 +425,73 @@ exports.default = E$;
 },{"argument-parsers":1,"event":3,"helpers":4,"listener-manager":6}],8:[function(_dereq_,module,exports){
 "use strict";
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+var stack,
+    index = 0,
+    length = 0,
+    inprog = false;
 
-function _classCallCheck() {}
-
-var Stack = (function () {
-  function Stack() {
-    _classCallCheck(this, Stack);
-
-    var that = this;
-    that.index = 0;
-    that.length = 0;
-    that.inprog = false;
+exports.default = stack = Object.create({
+  /* jshint -W033 */
+  get index() {
+    return index;
+  },
+  get length() {
+    return length;
+  },
+  get inprog() {
+    return inprog;
+  },
+  enqueue: function enqueue(fn) {
+    stack[length] = fn;
+    length++;
+  },
+  flush: function flush() {
+    var fn, caught;
+    if (!inprog) {
+      inprog = true;
+      /* jshint -W084 */
+      while (fn = next()) {
+        try {
+          fn();
+        } catch (err) {
+          caught = err;
+          empty();
+          break;
+        }
+      }
+      inprog = false;
+      if (caught) {
+        throw caught;
+      }
+    }
   }
+});
 
-  _createClass(Stack, [{
-    key: "enqueue",
-    value: function enqueue(fn) {
-      var that = this;
-      that[that.length] = fn;
-      that.length++;
-    }
-  }, {
-    key: "empty",
-    value: function empty() {
-      this.length = this.index = 0;
-    }
-  }, {
-    key: "next",
-    value: function next() {
-      var that = this,
-          fn = that[that.index];
-      delete that[that.index];
-      that.index++;
-      if (that.index >= that.length) {
-        that.empty();
-      }
-      return fn;
-    }
-  }, {
-    key: "flush",
-    value: function flush() {
-      var that = this,
-          fn,
-          caught;
-      if (!that.inprog) {
-        that.inprog = true;
-        /* jshint -W084 */
-        while (fn = that.next()) {
-          try {
-            fn();
-          } catch (err) {
-            caught = err;
-            that.empty();
-          }
-        }
-        that.inprog = false;
-        if (caught) {
-          throw caught;
-        }
-      }
-    }
-  }]);
+function drop() {
+  delete stack[index];
+}
 
-  return Stack;
-})();
+function empty() {
+  index = length;
+  while (index > 0) {
+    index--;
+    drop();
+  }
+  length = index = 0;
+}
 
-exports.default = Stack;
+function next() {
+  var fn = stack[index];
+  drop();
+  index++;
+  if (index >= length) {
+    empty();
+  }
+  return fn;
+}
 
 },{}]},{},[5])(5)
 });

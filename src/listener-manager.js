@@ -1,38 +1,36 @@
-import Stack from 'stack';
-import EventHandler from 'event-handler';
+import EventListener from 'event-listener';
+import stack from 'stack';
 import { $_each } from 'helpers';
 
 export const WILDCARD = '*';
 
 export default function ListenerManager(){
   Array.call( this );
-  this.stack = new Stack();
+}
+
+function enqueue( fn ){
+  stack.enqueue( fn );
+  stack.flush();
 }
 
 ListenerManager.prototype = Object.create( Array.prototype );
 
 ListenerManager.prototype.constructor = ListenerManager;
 
-ListenerManager.prototype._enqueue = function( fn ){
-  var stack = this.stack;
-  stack.enqueue( fn );
-  stack.flush();
-};
-
 ListenerManager.prototype.add = function( types , fn , args ){
   var that = this;
-  that._enqueue(function(){
+  enqueue(function(){
     that.push(
-      new EventHandler( types , fn , args )
+      new EventListener( types , fn , args )
     );
   });
 };
 
 ListenerManager.prototype.invoke = function( evt , args ){
   var that = this;
-  that._enqueue(function(){
-    that.forEach(function( evtHandler ){
-      evtHandler.invoke( evt , args );
+  enqueue(function(){
+    that.forEach(function( evtListener ){
+      evtListener.invoke( evt , args );
     });
   });
 };
@@ -40,17 +38,17 @@ ListenerManager.prototype.invoke = function( evt , args ){
 ListenerManager.prototype.remove = function( removeTypes , fn , wild ){
   var that = this;
   removeTypes = [].concat( removeTypes );
-  that._enqueue(function(){
+  enqueue(function(){
     $_each( removeTypes , function( removeType ){
       var len = that.length,
         i = 0,
-        evtHandler,
+        evtListener,
         handleTypes,
         index;
       while (i < len) {
-        evtHandler = that[i];
-        if (!fn || evtHandler.fn == fn) {
-          handleTypes = evtHandler.types;
+        evtListener = that[i];
+        if (!fn || evtListener.fn == fn) {
+          handleTypes = evtListener.types;
           index = handleTypes.indexOf( removeType );
           if (index >= 0 && removeType != WILDCARD) {
             handleTypes.splice( index , 1 );

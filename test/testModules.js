@@ -1,6 +1,6 @@
-import EventHandler from 'event-handler';
+import EventListener from 'event-listener';
 import Event from 'event';
-import Stack from 'stack';
+import stack from 'stack';
 import {
   WILDCARD,
   default as ListenerManager
@@ -9,7 +9,7 @@ import {
 module.exports = {
   WILDCARD: WILDCARD,
   Event: Event,
-  EventHandler: EventHandler,
-  Stack: Stack,
+  EventListener: EventListener,
+  stack: stack,
   ListenerManager: ListenerManager
 };

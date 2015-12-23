@@ -73,11 +73,11 @@ export default class E$ {
   $once(){
     var that = this,
       called;
-    whenParser( that , arguments , function( eventTypes , handlerArgs , handlerFn ){
-      that.$when( eventTypes , handlerArgs , function once(){
+    whenParser( that , arguments , function( eventTypes , listenerArgs , listenerFn ){
+      that.$when( eventTypes , listenerArgs , function once(){
         if (!called) {
           called = true;
-          handlerFn.apply( UNDEFINED , arguments );
+          listenerFn.apply( UNDEFINED , arguments );
           that.$dispel( eventTypes , true , once );
         }
       });
@@ -86,19 +86,19 @@ export default class E$ {
   }
   $when(){
     var that = this;
-    whenParser( that , arguments , function( eventTypes , handlerArgs , handlerFn ){
-      that.$__listeners.add( eventTypes , handlerFn , handlerArgs );
+    whenParser( that , arguments , function( eventTypes , listenerArgs , listenerFn ){
+      that.$__listeners.add( eventTypes , listenerFn , listenerArgs );
     });
     return that;
   }
   $emit(){
     var that = this;
-    emitParser( that , arguments , function( eventTypes , handlerArgs , emitCb ){
+    emitParser( that , arguments , function( eventTypes , listenerArgs , emitCb ){
       $_each( eventTypes , function( type ){
         var evt = new Event( that , type );
-        that.$__listeners.invoke( evt , handlerArgs );
+        that.$__listeners.invoke( evt , listenerArgs );
         if ($_is( emitCb , 'function' ) && !evt.defaultPrevented) {
-          emitCb.apply( UNDEFINED , [].concat( evt , handlerArgs ));
+          emitCb.apply( UNDEFINED , [].concat( evt , listenerArgs ));
         }
       });
     });
@@ -106,8 +106,8 @@ export default class E$ {
   }
   $dispel(){
     var that = this;
-    dispelParser( that , arguments , function( eventTypes , wild , handlerFn ){
-      that.$__listeners.remove( eventTypes , handlerFn , wild );
+    dispelParser( that , arguments , function( eventTypes , wild , listenerFn ){
+      that.$__listeners.remove( eventTypes , listenerFn , wild );
     });
     return that;
   }

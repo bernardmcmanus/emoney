@@ -1,48 +1,59 @@
-export default class Stack {
-  constructor(){
-    var that = this;
-    that.index = 0;
-    that.length = 0;
-    that.inprog = false;
-  }
-  enqueue( fn ){
-    var that = this;
-    that[that.length] = fn;
-    that.length++;
-  }
-  empty(){
-    this.length = this.index = 0;
-  }
-  next(){
-    var that = this,
-      fn = that[that.index];
-    delete that[that.index];
-    that.index++;
-    if (that.index >= that.length) {
-      that.empty();
-    }
-    return fn;
-  }
-  flush(){
-    var that = this,
-      fn,
-      caught;
-    if (!that.inprog) {
-      that.inprog = true;
+var stack,
+  index = 0,
+  length = 0,
+  inprog = false;
+
+export default stack = Object.create({
+  /* jshint -W033 */
+  get index(){ return index },
+  get length(){ return length },
+  get inprog(){ return inprog },
+  enqueue: function( fn ){
+    stack[length] = fn;
+    length++;
+  },
+  flush: function(){
+    var fn, caught;
+    if (!inprog) {
+      inprog = true;
       /* jshint -W084 */
-      while (fn = that.next()) {
+      while (fn = next()) {
         try {
           fn();
         }
         catch( err ){
           caught = err;
-          that.empty();
+          empty();
+          break;
         }
       }
-      that.inprog = false;
+      inprog = false;
       if (caught) {
         throw caught;
       }
     }
   }
+});
+
+function drop(){
+  delete stack[index];
+}
+
+function empty(){
+  index = length;
+  while (index > 0) {
+    index--;
+    drop();
+  }
+  length = index = 0;
+}
+
+function next(){
+  var fn = stack[index];
+  drop();
+  index++;
+  if (index >= length) {
+    empty();
+  }
+  return fn;
 }

@@ -1,8 +1,6 @@
 (function(){
   'use strict';
 
-  var path = require( 'path' );
-  var fs = require( 'fs-extra' );
   var util = require( 'util' );
   var chai = require( 'chai' );
   var expect = chai.expect;
@@ -14,7 +12,7 @@
     console.log.apply( null , args );
   };
 
-  var E$ = require(path.resolve( __dirname , '..' , 'compiled/emoney.js' ));
+  var E$ = require( '../compiled/emoney.js' );
   var TestModules = require( './testModules.compiled.js' );
 
   var SEED = { name: 'emoney' };
@@ -43,7 +41,7 @@
   });
 
   describe( '#$when' , function(){
-    it( 'should add an event handler' , function(){
+    it( 'should add an event listener' , function(){
       emoney.$when( 'gnarly' , Test );
       expect( emoney.$__listeners[0].fn ).to.equal( Test );
       expect( emoney.$__listeners[0].types ).to.include( 'gnarly' );
@@ -51,7 +49,7 @@
       emoney.$dispel();
       expect( emoney.$__listeners ).to.have.length( 0 );
     });
-    it( 'should use subject.handleE$ when handler is falsy' , function(){
+    it( 'should use subject.handleE$ when listener is falsy' , function(){
       emoney.$when( 'rad' );
       expect( emoney.$__listeners[0].fn ).to.equal( emoney.handleE$ );
       expect( emoney.$__listeners[0].types ).to.include( 'rad' );
@@ -68,7 +66,7 @@
         .$when( 'asdf' )
         .$emit( 'asdf' );
     });
-    it( 'should bind args to each event handler' , function(){
+    it( 'should bind args to each event listener' , function(){
       var arr = [];
       for (var i = 0; i < 10; i++) { arr.push( i ) }
       arr.forEach(function( i ) {
@@ -81,17 +79,27 @@
       emoney.$dispel();
       expect( emoney.$__listeners ).to.have.length( 0 );
     });
-    it( 'should add a wildcard handler when event is falsy' , function(){
+    it( 'should add a wildcard listener when event is falsy' , function(){
       emoney.$when();
       expect( emoney.$__listeners[0].fn ).to.equal( emoney.handleE$ );
       expect( emoney.$__listeners[0].types ).to.include( TestModules.WILDCARD );
       emoney.$dispel( null , true );
       expect( emoney.$__listeners ).to.have.length( 0 );
     });
+    it( 'should handle errors thrown in listener functions' , function(){
+      emoney.$when( 'asdf' , function(){
+        throw new Error( 'test' );
+      });
+      expect(function(){
+        emoney.$emit( 'asdf' );
+      })
+      .to.throw( /test/i );
+      emoney.$dispel( 'asdf' );
+    });
   });
 
   describe( '#$once' , function(){
-    it( 'should remove an event handler after it is executed' , function(){
+    it( 'should remove an event listener after it is executed' , function(){
       emoney.$once( 'gnarly' , function fn(){
         expect( emoney.$__listeners[0].types ).to.include( 'gnarly' );
       });
@@ -109,7 +117,7 @@
       expect( result ).to.eql( eventList[0] );
       expect( emoney.$__listeners ).to.have.length( 0 );
     });
-    it( 'should bind args to each event handler' , function(){
+    it( 'should bind args to each event listener' , function(){
       var arr = [];
       for (var i = 0; i < 10; i++) { arr.push( i ) }
       arr.forEach(function( i ) {
@@ -121,7 +129,7 @@
       emoney.$emit( 'rad' );
       expect( emoney.$__listeners ).to.have.length( 0 );
     });
-    it( 'should remove the wildcard handler after an $emit' , function(){
+    it( 'should remove the wildcard listener after an $emit' , function(){
       var events = [ 'gnarly' , 'rad' ];
       var emitted;
       emoney.$once( TestModules.WILDCARD , function( e ){
@@ -136,7 +144,7 @@
 
   describe( '#$emit' , function(){
     var events = [ 'gnarly' , 'rad' ];
-    it( 'should always execute handlers and callbacks by default' , function(){
+    it( 'should always execute listeners and callbacks by default' , function(){
       var arr = [];
       emoney.$once( events , function( e ){
         arr.push( e.type );
@@ -151,7 +159,7 @@
       expect( arr ).to.eql([ events[0] , events[0] , events[0] , events[1] ]);
       expect( emoney.$__listeners ).to.have.length( 0 );
     });
-    it( 'should execute handlers but NOT callbacks if default is prevented' , function(){
+    it( 'should execute listeners but NOT callbacks if default is prevented' , function(){
       var arr = [];
       emoney.$once( events , function( e ){
         expect( e.defaultPrevented ).to.equal( false );
@@ -191,7 +199,7 @@
       expect( arr ).to.eql([ events[0] , events[0] , events[1] , events[1] ]);
       expect( emoney.$__listeners ).to.have.length( 0 );
     });
-    it( 'should always execute wildcard handlers' , function(){
+    it( 'should always execute wildcard listeners' , function(){
       var events = [ 'gnarly' , 'rad' ], emitted = [];
       emoney.$when( TestModules.WILDCARD , function( e ){
         emitted.push( e.type );
@@ -247,13 +255,13 @@
     before(function(){
       expect( emoney.$__listeners ).to.have.length( 0 );
     });
-    it( 'should remove an event handler' , function(){
+    it( 'should remove an event listener' , function(){
       emoney.$when( 'gnarly' , Test );
       expect( emoney.$__listeners ).to.have.length( 1 );
       emoney.$dispel( 'gnarly' , Test );
       expect( emoney.$__listeners ).to.have.length( 0 );
     });
-    it( 'should remove all event handlers if no arguments are passed' , function(){
+    it( 'should remove all event listeners if no arguments are passed' , function(){
       emoney
         .$when( 'gnarly' , Test )
         .$when( 'rad' , Test )
@@ -268,7 +276,7 @@
       emoney.$dispel();
       expect( emoney.$__listeners ).to.have.length( 0 );
     });
-    it( 'should remove all handlers matched by func when event type is falsy' , function(){
+    it( 'should remove all listeners matched by func when event type is falsy' , function(){
       emoney
         .$when([ 'gnarly' , 'rad' ] , Test )
         .$when([ 'gnarly' , 'rad' ] , Test2 );
@@ -278,12 +286,12 @@
       emoney.$dispel();
       expect( emoney.$__listeners ).to.have.length( 0 );
     });
-    it( 'should not remove wildcard handlers if wild is falsy' , function(){
+    it( 'should not remove wildcard listeners if wild is falsy' , function(){
       emoney.$when( TestModules.WILDCARD );
       emoney.$dispel();
       expect( emoney.$__listeners ).to.have.length( 1 );
     });
-    it( 'should remove wildcard handlers if wild is truthy' , function(){
+    it( 'should remove wildcard listeners if wild is truthy' , function(){
       emoney.$dispel( null , true );
       expect( emoney.$__listeners ).to.have.length( 0 );
     });
@@ -418,7 +426,7 @@
       expect( gnarly.$__listeners ).to.be.an( 'object' );
       expect( gnarly.handleE$ ).to.not.equal( Gnarly.prototype.handleE$ );
     });
-    it( 'should define unique handlers objects' , function(){
+    it( 'should define unique listeners objects' , function(){
       var gnarly1 = new Gnarly();
       var gnarly2 = new Gnarly();
       gnarly1.$when( 'rad' , function(){
@@ -444,11 +452,11 @@
     });
   });
 
-  describe( 'EventHandler' , function(){
+  describe( 'EventListener' , function(){
     describe( '#constructor' , function(){
       it( 'should throw an error when called with an array containing wildcard along with other events' , function(){
         expect(function(){
-          new TestModules.EventHandler([ TestModules.WILDCARD , 'asdf' ]);
+          new TestModules.EventListener([ TestModules.WILDCARD , 'asdf' ]);
         })
         .to.throw( /wildcard/i );
       });
@@ -458,25 +466,25 @@
         var called = 0,
           count = 10,
           evt = new TestModules.Event( emoney , 'asdf' ),
-          evtHandler = new TestModules.EventHandler( 'asdf' , handlerFunc );
-        function handlerFunc( e ){
+          evtListener = new TestModules.EventListener( 'asdf' , listenerFunc );
+        function listenerFunc( e ){
           expect( this ).to.be.undefined;
           expect( e.target ).to.equal( emoney );
           expect( arguments.length ).to.equal( 1 );
           called++;
         }
         for (var i = 0; i < count; i++) {
-          evtHandler.invoke( evt );
+          evtListener.invoke( evt );
         }
         expect( called ).to.equal( count );
       });
       it( 'should not execute instance.fn when invoked with an event not in the types array' , function(){
         var called = 0,
           evt = new TestModules.Event( emoney , 'asdf' ),
-          evtHandler = new TestModules.EventHandler( 'jkl;' , function(){
+          evtListener = new TestModules.EventListener( 'jkl;' , function(){
             called++;
           });
-        evtHandler.invoke( evt );
+        evtListener.invoke( evt );
         expect( called ).to.equal( 0 );
       });
     });
@@ -485,7 +493,7 @@
   describe( 'ListenerManager' , function(){
     var listeners = new TestModules.ListenerManager();
     describe( '#add' , function(){
-      it( 'should push a new EventHandler' , function(){
+      it( 'should push a new EventListener' , function(){
         listeners.add( 'gnarly' , Test );
         expect( listeners ).to.have.length( 1 );
         expect( listeners[0].types ).to.have.length( 1 );
@@ -504,7 +512,7 @@
       });
     });
     describe( '#invoke' , function(){
-      it( 'should invoke event handlers in the type array' , function( done ){
+      it( 'should invoke event listeners in the type array' , function( done ){
         listeners.add( 'rad' , function once( e , test1 , test2 ){
           expect( e ).to.be.an.instanceOf( TestModules.Event );
           expect( e.target ).to.equal( listeners );
@@ -536,7 +544,7 @@
       });
     });
     describe( '#remove' , function(){
-      it( 'should remove all matched handlers' , function(){
+      it( 'should remove all matched listeners' , function(){
         listeners.add( 'gnarly' , Test );
         listeners.add( 'gnarly' , Test2 );
         listeners.add( 'gnarly' , Test3 );
@@ -548,7 +556,7 @@
         listeners.remove( 'gnarly' , Test3 );
         expect( listeners ).to.have.length( 0 );
       });
-      it( 'should remove only handlers matched by event type and handler function' , function(){
+      it( 'should remove only listeners matched by event type and listener function' , function(){
         listeners.add( 'gnarly' , Test );
         listeners.add( 'gnarly' , Test2 );
         listeners.add( 'rad' , Test );
@@ -604,7 +612,7 @@
   });
 
   describe( 'Stack' , function(){
-    var stack = new TestModules.Stack();
+    var stack = TestModules.stack;
     describe( '#enqueue' , function(){
       it( 'should push a function to stack' , function( done ){
         stack.enqueue( done );
@@ -694,9 +702,10 @@
             });
           }( i ));
         }
-        expect( stack.length ).to.equal( count );
+        expect( stack ).to.have.length( count );
         expect(function(){ stack.flush() }).to.throw( /test error 2/ );
-        expect( stack.length ).to.equal( 0 );
+        expect( stack ).to.have.length( 0 );
+        expect(Object.keys( stack )).to.have.length( 0 );
       });
     });
   });
