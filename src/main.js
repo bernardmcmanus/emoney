@@ -5,9 +5,9 @@ import {
 } from 'listener-manager';
 import {
   $_toArray,
-  $_is,
-  $_each,
-  $_defineProperties
+  $_isObject,
+  $_isFunction,
+  $_each
 } from 'helpers';
 import {
   whenParser,
@@ -15,20 +15,32 @@ import {
   dispelParser
 } from 'argument-parsers';
 
-export default class E$ {
-  static is( subject ) {
-    return !!(subject && $_is( subject , 'object' ) && 'handleE$' in subject);
+export default function E$( seed ){
+  var that = this;
+  if (that == $global || that == UNDEFINED) {
+    return new E$( seed );
   }
-  static create( subjectProto ){
-    var extendedProto = Object.create( E$.prototype );
-    $_each( subjectProto , function( method , name ){
-      extendedProto[name] = method;
-    });
-    return extendedProto;
-  }
-  static construct( instance ){
-    var listeners = new ListenerManager();
-    $_defineProperties( instance , {
+  $_each( seed , function( value , key ){
+    that[key] = value;
+  });
+  E$.construct( that );
+}
+
+E$.is = function( subject ) {
+  return !!(subject && $_isObject( subject ) && 'handleE$' in subject);
+};
+
+E$.create = function( subjectProto ){
+  var extendedProto = Object.create( E$.prototype );
+  $_each( subjectProto , function( method , name ){
+    extendedProto[name] = method;
+  });
+  return extendedProto;
+};
+
+E$.construct = function( instance ){
+  var listeners = new ListenerManager(),
+    descriptors = {
       $__listeners: { value: listeners },
       $__handleWild: { value: function(){
         var args = $_toArray( arguments ),
@@ -38,19 +50,16 @@ export default class E$ {
       handleE$: {
         value: (instance.handleE$ || function(){}).bind( instance )
       },
-    });
-  }
-  constructor( seed ){
-    var that = this;
-    if (that == $global || that == UNDEFINED) {
-      return new E$( seed );
-    }
-    $_each( seed , function( value , key ){
-      that[key] = value;
-    });
-    E$.construct( that );
-  }
-  $watch( emitters ){
+    };
+  $_each( descriptors , function( descriptor ){
+    descriptor.configurable = true;
+  });
+  Object.defineProperties( instance , descriptors );
+};
+
+E$.prototype = {
+  constructor: E$,
+  $watch: function( emitters ){
     var that = this;
     emitters = [].concat( emitters );
     $_each( emitters , function( emitter , key ){
@@ -59,8 +68,8 @@ export default class E$ {
         .$when( WILDCARD , that.$__handleWild );
     });
     return that;
-  }
-  $unwatch( emitters ){
+  },
+  $unwatch: function( emitters ){
     var that = this;
     emitters = [].concat( emitters );
     $_each( emitters , function( emitter ){
@@ -69,8 +78,8 @@ export default class E$ {
         .$dispel( WILDCARD , true , that.$__handleWild );
     });
     return that;
-  }
-  $once(){
+  },
+  $once: function(){
     var that = this,
       called;
     whenParser( that , arguments , function( eventTypes , listenerArgs , listenerFn ){
@@ -83,32 +92,32 @@ export default class E$ {
       });
     });
     return that;
-  }
-  $when(){
+  },
+  $when: function(){
     var that = this;
     whenParser( that , arguments , function( eventTypes , listenerArgs , listenerFn ){
       that.$__listeners.add( eventTypes , listenerFn , listenerArgs );
     });
     return that;
-  }
-  $emit(){
+  },
+  $emit: function(){
     var that = this;
     emitParser( that , arguments , function( eventTypes , listenerArgs , emitCb ){
       $_each( eventTypes , function( type ){
         var evt = new Event( that , type );
         that.$__listeners.invoke( evt , listenerArgs );
-        if ($_is( emitCb , 'function' ) && !evt.defaultPrevented) {
+        if ($_isFunction( emitCb ) && !evt.defaultPrevented) {
           emitCb.apply( UNDEFINED , [].concat( evt , listenerArgs ));
         }
       });
     });
     return that;
-  }
-  $dispel(){
+  },
+  $dispel: function(){
     var that = this;
     dispelParser( that , arguments , function( eventTypes , wild , listenerFn ){
       that.$__listeners.remove( eventTypes , listenerFn , wild );
     });
     return that;
   }
-}
+};

@@ -1,19 +1,4 @@
 module.exports = function( grunt ) {
-  var babelTemplate = require( 'babel-template' );
-  var helpers = require( './node_modules/babelify/node_modules/babel-core/node_modules/babel-helpers/lib/helpers' );
-  
-  /*helpers.possibleConstructorReturn = babelTemplate(
-    "(function( instance , call ){\
-      return call && (typeof call == 'object' || typeof call == 'function') ? call : instance;\
-    })"
-  );*/
-  /*helpers.possibleConstructorReturn = babelTemplate(
-    "(function( instance , $super ){\
-      return $super || instance;\
-    })"
-  );*/
-  helpers.classCallCheck = babelTemplate( '(function(){})' );
-
   // always print a stack trace if something goes wrong
   grunt.option( 'stack' , true );
 

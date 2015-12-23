@@ -1,6 +1,6 @@
 import E$ from 'main';
 import { WILDCARD } from 'listener-manager';
-import { $_is, $_toArray } from 'helpers';
+import { $_isFunction, $_toArray } from 'helpers';
 
 export function whenParser( instance , _arguments , cb ){
   var args = $_toArray( _arguments ),
@@ -28,7 +28,7 @@ export function dispelParser( instance , _arguments , cb ){
 
 function lastIsFunctionOrEmoney( args ){
   var last = args.slice( -1 )[0];
-  return $_is( last , 'function' ) || E$.is( last );
+  return $_isFunction( last ) || E$.is( last );
 }
 
 function getListenerFunc( subject ){

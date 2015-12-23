@@ -1,4 +1,4 @@
-/*! emoney - 1.0.0 - Bernard McManus - 4429d46 - 2015-12-23 */
+/*! emoney - 1.0.0 - Bernard McManus - 028f23f - 2015-12-23 */
 
 (function($global,Array,Object,Date,Error,UNDEFINED){
 "use strict";
@@ -49,7 +49,7 @@ function dispelParser(instance, _arguments, cb) {
 
 function lastIsFunctionOrEmoney(args) {
   var last = args.slice(-1)[0];
-  return (0, _helpers.$_is)(last, 'function') || _main2.default.is(last);
+  return (0, _helpers.$_isFunction)(last) || _main2.default.is(last);
 }
 
 function getListenerFunc(subject) {
@@ -85,47 +85,32 @@ function EventListener(types, fn, bindArgs) {
 },{"listener-manager":6}],3:[function(_dereq_,module,exports){
 'use strict';
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.default = Event;
 
 var _listenerManager = _dereq_('listener-manager');
 
-function _classCallCheck() {}
-
-var Event = (function () {
-  function Event(target, type) {
-    _classCallCheck(this, Event);
-
-    if (type == _listenerManager.WILDCARD) {
-      throw new Error('Invalid event type: ' + _listenerManager.WILDCARD + '.');
-    }
-    var that = this;
-    that.target = target;
-    that.type = type;
-    that.cancelBubble = false;
-    that.defaultPrevented = false;
-    that.timeStamp = Date.now();
+function Event(target, type) {
+  if (type == _listenerManager.WILDCARD) {
+    throw new Error('Invalid event type: ' + _listenerManager.WILDCARD + '.');
   }
+  var that = this;
+  that.target = target;
+  that.type = type;
+  that.cancelBubble = false;
+  that.defaultPrevented = false;
+  that.timeStamp = Date.now();
+}
 
-  _createClass(Event, [{
-    key: 'preventDefault',
-    value: function preventDefault() {
-      this.defaultPrevented = true;
-    }
-  }, {
-    key: 'stopPropagation',
-    value: function stopPropagation() {
-      this.cancelBubble = true;
-    }
-  }]);
+Event.prototype.preventDefault = function () {
+  this.defaultPrevented = true;
+};
 
-  return Event;
-})();
-
-exports.default = Event;
+Event.prototype.stopPropagation = function () {
+  this.cancelBubble = true;
+};
 
 },{"listener-manager":6}],4:[function(_dereq_,module,exports){
 'use strict';
@@ -133,29 +118,19 @@ exports.default = Event;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.$_defineProperties = $_defineProperties;
-exports.$_is = $_is;
+exports.$_isObject = $_isObject;
+exports.$_isFunction = $_isFunction;
 exports.$_toArray = $_toArray;
 exports.$_each = $_each;
 
 function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
 
-function $_defineProperties(subject, descriptors) {
-  $_each(descriptors, function (descriptor, key) {
-    descriptor.configurable = true;
-  });
-  Object.defineProperties(subject, descriptors);
+function $_isObject(subject) {
+  return subject && (typeof subject === 'undefined' ? 'undefined' : _typeof(subject)) == 'object';
 }
 
-function $_is(subject, test) {
-  if (typeof test == 'string') {
-    return (typeof subject === 'undefined' ? 'undefined' : _typeof(subject)) == test;
-  } else if (test === Array) {
-    return Array.isArray(subject);
-  } else if (test) {
-    return subject.constructor === ($_is(test, 'function') ? test : test.constructor);
-  }
-  return subject === test;
+function $_isFunction(subject) {
+  return typeof subject == 'function';
 }
 
 function $_toArray(subject) {
@@ -163,11 +138,11 @@ function $_toArray(subject) {
 }
 
 function $_each(subject, cb) {
-  if ($_is(subject, Array)) {
+  if (Array.isArray(subject)) {
     for (var i = 0; i < subject.length; i++) {
       cb(subject[i], i);
     }
-  } else if ($_is(subject, 'object')) {
+  } else if ($_isObject(subject)) {
     for (var key in subject) {
       if (subject.hasOwnProperty(key)) {
         cb(subject[key], key);
@@ -278,11 +253,10 @@ ListenerManager.prototype.remove = function (removeTypes, fn, wild) {
 },{"event-listener":2,"helpers":4,"stack":8}],7:[function(_dereq_,module,exports){
 'use strict';
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.default = E$;
 
 var _event = _dereq_('event');
 
@@ -298,129 +272,108 @@ var _argumentParsers = _dereq_('argument-parsers');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _classCallCheck() {}
+function E$(seed) {
+  var that = this;
+  if (that == $global || that == UNDEFINED) {
+    return new E$(seed);
+  }
+  (0, _helpers.$_each)(seed, function (value, key) {
+    that[key] = value;
+  });
+  E$.construct(that);
+}
 
-var E$ = (function () {
-  _createClass(E$, null, [{
-    key: 'is',
-    value: function is(subject) {
-      return !!(subject && (0, _helpers.$_is)(subject, 'object') && 'handleE$' in subject);
+E$.is = function (subject) {
+  return !!(subject && (0, _helpers.$_isObject)(subject) && 'handleE$' in subject);
+};
+
+E$.create = function (subjectProto) {
+  var extendedProto = Object.create(E$.prototype);
+  (0, _helpers.$_each)(subjectProto, function (method, name) {
+    extendedProto[name] = method;
+  });
+  return extendedProto;
+};
+
+E$.construct = function (instance) {
+  var listeners = new _listenerManager2.default(),
+      descriptors = {
+    $__listeners: { value: listeners },
+    $__handleWild: { value: function value() {
+        var args = (0, _helpers.$_toArray)(arguments),
+            evt = args.shift();
+        listeners.invoke(evt, args);
+      } },
+    handleE$: {
+      value: (instance.handleE$ || function () {}).bind(instance)
     }
-  }, {
-    key: 'create',
-    value: function create(subjectProto) {
-      var extendedProto = Object.create(E$.prototype);
-      (0, _helpers.$_each)(subjectProto, function (method, name) {
-        extendedProto[name] = method;
-      });
-      return extendedProto;
-    }
-  }, {
-    key: 'construct',
-    value: function construct(instance) {
-      var listeners = new _listenerManager2.default();
-      (0, _helpers.$_defineProperties)(instance, {
-        $__listeners: { value: listeners },
-        $__handleWild: { value: function value() {
-            var args = (0, _helpers.$_toArray)(arguments),
-                evt = args.shift();
-            listeners.invoke(evt, args);
-          } },
-        handleE$: {
-          value: (instance.handleE$ || function () {}).bind(instance)
+  };
+  (0, _helpers.$_each)(descriptors, function (descriptor) {
+    descriptor.configurable = true;
+  });
+  Object.defineProperties(instance, descriptors);
+};
+
+E$.prototype = {
+  constructor: E$,
+  $watch: function $watch(emitters) {
+    var that = this;
+    emitters = [].concat(emitters);
+    (0, _helpers.$_each)(emitters, function (emitter, key) {
+      emitter.$when(_listenerManager.WILDCARD, that).$when(_listenerManager.WILDCARD, that.$__handleWild);
+    });
+    return that;
+  },
+  $unwatch: function $unwatch(emitters) {
+    var that = this;
+    emitters = [].concat(emitters);
+    (0, _helpers.$_each)(emitters, function (emitter) {
+      emitter.$dispel(_listenerManager.WILDCARD, true, that).$dispel(_listenerManager.WILDCARD, true, that.$__handleWild);
+    });
+    return that;
+  },
+  $once: function $once() {
+    var that = this,
+        called;
+    (0, _argumentParsers.whenParser)(that, arguments, function (eventTypes, listenerArgs, listenerFn) {
+      that.$when(eventTypes, listenerArgs, function once() {
+        if (!called) {
+          called = true;
+          listenerFn.apply(UNDEFINED, arguments);
+          that.$dispel(eventTypes, true, once);
         }
       });
-    }
-  }]);
-
-  function E$(seed) {
-    _classCallCheck(this, E$);
-
-    var that = this;
-    if (that == $global || that == UNDEFINED) {
-      return new E$(seed);
-    }
-    (0, _helpers.$_each)(seed, function (value, key) {
-      that[key] = value;
     });
-    E$.construct(that);
+    return that;
+  },
+  $when: function $when() {
+    var that = this;
+    (0, _argumentParsers.whenParser)(that, arguments, function (eventTypes, listenerArgs, listenerFn) {
+      that.$__listeners.add(eventTypes, listenerFn, listenerArgs);
+    });
+    return that;
+  },
+  $emit: function $emit() {
+    var that = this;
+    (0, _argumentParsers.emitParser)(that, arguments, function (eventTypes, listenerArgs, emitCb) {
+      (0, _helpers.$_each)(eventTypes, function (type) {
+        var evt = new _event2.default(that, type);
+        that.$__listeners.invoke(evt, listenerArgs);
+        if ((0, _helpers.$_isFunction)(emitCb) && !evt.defaultPrevented) {
+          emitCb.apply(UNDEFINED, [].concat(evt, listenerArgs));
+        }
+      });
+    });
+    return that;
+  },
+  $dispel: function $dispel() {
+    var that = this;
+    (0, _argumentParsers.dispelParser)(that, arguments, function (eventTypes, wild, listenerFn) {
+      that.$__listeners.remove(eventTypes, listenerFn, wild);
+    });
+    return that;
   }
-
-  _createClass(E$, [{
-    key: '$watch',
-    value: function $watch(emitters) {
-      var that = this;
-      emitters = [].concat(emitters);
-      (0, _helpers.$_each)(emitters, function (emitter, key) {
-        emitter.$when(_listenerManager.WILDCARD, that).$when(_listenerManager.WILDCARD, that.$__handleWild);
-      });
-      return that;
-    }
-  }, {
-    key: '$unwatch',
-    value: function $unwatch(emitters) {
-      var that = this;
-      emitters = [].concat(emitters);
-      (0, _helpers.$_each)(emitters, function (emitter) {
-        emitter.$dispel(_listenerManager.WILDCARD, true, that).$dispel(_listenerManager.WILDCARD, true, that.$__handleWild);
-      });
-      return that;
-    }
-  }, {
-    key: '$once',
-    value: function $once() {
-      var that = this,
-          called;
-      (0, _argumentParsers.whenParser)(that, arguments, function (eventTypes, listenerArgs, listenerFn) {
-        that.$when(eventTypes, listenerArgs, function once() {
-          if (!called) {
-            called = true;
-            listenerFn.apply(UNDEFINED, arguments);
-            that.$dispel(eventTypes, true, once);
-          }
-        });
-      });
-      return that;
-    }
-  }, {
-    key: '$when',
-    value: function $when() {
-      var that = this;
-      (0, _argumentParsers.whenParser)(that, arguments, function (eventTypes, listenerArgs, listenerFn) {
-        that.$__listeners.add(eventTypes, listenerFn, listenerArgs);
-      });
-      return that;
-    }
-  }, {
-    key: '$emit',
-    value: function $emit() {
-      var that = this;
-      (0, _argumentParsers.emitParser)(that, arguments, function (eventTypes, listenerArgs, emitCb) {
-        (0, _helpers.$_each)(eventTypes, function (type) {
-          var evt = new _event2.default(that, type);
-          that.$__listeners.invoke(evt, listenerArgs);
-          if ((0, _helpers.$_is)(emitCb, 'function') && !evt.defaultPrevented) {
-            emitCb.apply(UNDEFINED, [].concat(evt, listenerArgs));
-          }
-        });
-      });
-      return that;
-    }
-  }, {
-    key: '$dispel',
-    value: function $dispel() {
-      var that = this;
-      (0, _argumentParsers.dispelParser)(that, arguments, function (eventTypes, wild, listenerFn) {
-        that.$__listeners.remove(eventTypes, listenerFn, wild);
-      });
-      return that;
-    }
-  }]);
-
-  return E$;
-})();
-
-exports.default = E$;
+};
 
 },{"argument-parsers":1,"event":3,"helpers":4,"listener-manager":6}],8:[function(_dereq_,module,exports){
 "use strict";
