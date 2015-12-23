@@ -13,7 +13,7 @@
   };
 
   var E$ = require( '../compiled/emoney.js' );
-  var TestModules = require( './testModules.compiled.js' );
+  var imports = require( './imports.compiled.js' );
 
   var SEED = { name: 'emoney' };
   function Test(){}
@@ -37,6 +37,23 @@
     });
     it( 'should should define properties that are configurable' , function(){
       E$.call( emoney );
+    });
+    it( 'should be compatible with ES2015 classes' , function(){
+      var emoneyExtended = new imports.E$Extended(),
+        gotCalls = 0,
+        cb = function(){ gotCalls++ };
+      expect( emoneyExtended ).to.be.an.instanceOf( imports.E$ );
+      expect(E$.is( emoneyExtended )).to.be.true;
+      emoneyExtended
+        .$when( 'asdf' )
+        .$emit( 'asdf' , [ cb ])
+        .$dispel( 'asdf' )
+        .$emit( 'asdf' , [ cb ]);
+      emoneyExtended
+        .$once( 'asdf' )
+        .$emit( 'asdf' , [ cb ])
+        .$emit( 'asdf' , [ cb ]);
+      expect( gotCalls ).to.equal( 2 );
     });
   });
 
@@ -82,7 +99,7 @@
     it( 'should add a wildcard listener when event is falsy' , function(){
       emoney.$when();
       expect( emoney.$__listeners[0].fn ).to.equal( emoney.handleE$ );
-      expect( emoney.$__listeners[0].types ).to.include( TestModules.WILDCARD );
+      expect( emoney.$__listeners[0].types ).to.include( imports.WILDCARD );
       emoney.$dispel( null , true );
       expect( emoney.$__listeners ).to.have.length( 0 );
     });
@@ -132,7 +149,7 @@
     it( 'should remove the wildcard listener after an $emit' , function(){
       var events = [ 'gnarly' , 'rad' ];
       var emitted;
-      emoney.$once( TestModules.WILDCARD , function( e ){
+      emoney.$once( imports.WILDCARD , function( e ){
         emitted = e.type;
       });
       emoney.$emit( events[1] );
@@ -201,7 +218,7 @@
     });
     it( 'should always execute wildcard listeners' , function(){
       var events = [ 'gnarly' , 'rad' ], emitted = [];
-      emoney.$when( TestModules.WILDCARD , function( e ){
+      emoney.$when( imports.WILDCARD , function( e ){
         emitted.push( e.type );
       });
       emoney.$emit( events );
@@ -211,12 +228,12 @@
     });
     it( 'should not explicitly emit wildcard events' , function(){
       var emitted = [];
-      emoney.$when( TestModules.WILDCARD , function( e ){
+      emoney.$when( imports.WILDCARD , function( e ){
         emitted.push( e.type );
       });
       emoney.$emit();
       expect(function(){
-        emoney.$emit( TestModules.WILDCARD );
+        emoney.$emit( imports.WILDCARD );
       })
       .to.throw( /invalid/i );
       expect( emitted.length ).to.equal( 0 );
@@ -287,7 +304,7 @@
       expect( emoney.$__listeners ).to.have.length( 0 );
     });
     it( 'should not remove wildcard listeners if wild is falsy' , function(){
-      emoney.$when( TestModules.WILDCARD );
+      emoney.$when( imports.WILDCARD );
       emoney.$dispel();
       expect( emoney.$__listeners ).to.have.length( 1 );
     });
@@ -456,7 +473,7 @@
     describe( '#constructor' , function(){
       it( 'should throw an error when called with an array containing wildcard along with other events' , function(){
         expect(function(){
-          new TestModules.EventListener([ TestModules.WILDCARD , 'asdf' ]);
+          new imports.EventListener([ imports.WILDCARD , 'asdf' ]);
         })
         .to.throw( /wildcard/i );
       });
@@ -465,8 +482,8 @@
       it( 'args should be unique to each event occurrence' , function(){
         var called = 0,
           count = 10,
-          evt = new TestModules.Event( emoney , 'asdf' ),
-          evtListener = new TestModules.EventListener( 'asdf' , listenerFunc );
+          evt = new imports.Event( emoney , 'asdf' ),
+          evtListener = new imports.EventListener( 'asdf' , listenerFunc );
         function listenerFunc( e ){
           expect( this ).to.be.undefined;
           expect( e.target ).to.equal( emoney );
@@ -480,8 +497,8 @@
       });
       it( 'should not execute instance.fn when invoked with an event not in the types array' , function(){
         var called = 0,
-          evt = new TestModules.Event( emoney , 'asdf' ),
-          evtListener = new TestModules.EventListener( 'jkl;' , function(){
+          evt = new imports.Event( emoney , 'asdf' ),
+          evtListener = new imports.EventListener( 'jkl;' , function(){
             called++;
           });
         evtListener.invoke( evt );
@@ -491,7 +508,7 @@
   });
 
   describe( 'ListenerManager' , function(){
-    var listeners = new TestModules.ListenerManager();
+    var listeners = new imports.ListenerManager();
     describe( '#add' , function(){
       it( 'should push a new EventListener' , function(){
         listeners.add( 'gnarly' , Test );
@@ -514,33 +531,33 @@
     describe( '#invoke' , function(){
       it( 'should invoke event listeners in the type array' , function( done ){
         listeners.add( 'rad' , function once( e , test1 , test2 ){
-          expect( e ).to.be.an.instanceOf( TestModules.Event );
+          expect( e ).to.be.an.instanceOf( imports.Event );
           expect( e.target ).to.equal( listeners );
           expect( test1 ).to.equal( true );
           expect( test2 ).to.equal( false );
           listeners.remove( e.type , once );
           done();
         });
-        var evt = new TestModules.Event( listeners , 'rad' );
+        var evt = new imports.Event( listeners , 'rad' );
         listeners.invoke( evt , [ true , false ]);
       });
       it( 'should only invoke listeners matching type' , function(){
         var called = 0,
-          evt = new TestModules.Event( listeners , 'abc' );
+          evt = new imports.Event( listeners , 'abc' );
         listeners.add( 'abc' , function() {
           called++;
         });
         listeners.add( 'def' , function() {
           called++;
         });
-        listeners.add( TestModules.WILDCARD , function() {
+        listeners.add( imports.WILDCARD , function() {
           called++;
         });
         listeners.invoke( evt );
         expect( called ).to.equal( 2 );
         listeners.remove( 'abc' );
         listeners.remove( 'def' );
-        listeners.remove( TestModules.WILDCARD , null , true );
+        listeners.remove( imports.WILDCARD , null , true );
       });
     });
     describe( '#remove' , function(){
@@ -571,39 +588,39 @@
       });
       it( 'should remove all non-wildcard listeners when type is wildcard and wild is falsy' , function(){
         var called = 0,
-          evt = new TestModules.Event( listeners , 'asdf' ),
+          evt = new imports.Event( listeners , 'asdf' ),
           handle = function(){ called++ };
 
         listeners.add( 'asdf' , handle );
         expect( listeners ).to.have.length( 1 );
-        listeners.remove( TestModules.WILDCARD , handle );
+        listeners.remove( imports.WILDCARD , handle );
         listeners.invoke( evt );
         expect( listeners ).to.have.length( 0 );
         expect( called ).to.equal( 0 );
 
         listeners.add( 'asdf' , handle );
         expect( listeners ).to.have.length( 1 );
-        listeners.remove( TestModules.WILDCARD );
+        listeners.remove( imports.WILDCARD );
         listeners.invoke( evt );
         expect( listeners ).to.have.length( 0 );
         expect( called ).to.equal( 0 );
       });
       it( 'should not remove wildcard listeners unless wild is true' , function(){
         var called = 0,
-          evt = new TestModules.Event( listeners , 'asdf' ),
+          evt = new imports.Event( listeners , 'asdf' ),
           handle = function(){ called++ };
 
-        listeners.add( TestModules.WILDCARD , handle );
+        listeners.add( imports.WILDCARD , handle );
         expect( listeners ).to.have.length( 1 );
         listeners.invoke( evt );
         expect( called ).to.equal( 1 );
 
-        listeners.remove( TestModules.WILDCARD , handle );
+        listeners.remove( imports.WILDCARD , handle );
         expect( listeners ).to.have.length( 1 );
         listeners.invoke( evt );
         expect( called ).to.equal( 2 );
 
-        listeners.remove( TestModules.WILDCARD , handle , true );
+        listeners.remove( imports.WILDCARD , handle , true );
         expect( listeners ).to.have.length( 0 );
         listeners.invoke( evt );
         expect( called ).to.equal( 2 );
@@ -612,7 +629,7 @@
   });
 
   describe( 'Stack' , function(){
-    var stack = TestModules.stack;
+    var stack = imports.stack;
     describe( '#enqueue' , function(){
       it( 'should push a function to stack' , function( done ){
         stack.enqueue( done );

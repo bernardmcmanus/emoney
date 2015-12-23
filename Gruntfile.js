@@ -56,7 +56,7 @@ module.exports = function( grunt ) {
       },
       test: {
         files: {
-          'test/testModules.compiled.js': 'test/testModules.js'
+          'test/imports.compiled.js': 'test/imports.js'
         }
       }
     },
@@ -103,7 +103,7 @@ module.exports = function( grunt ) {
       },
       test: {
         files: {
-          'test/testModules.compiled.js': 'test/testModules.compiled.js'
+          'test/imports.compiled.js': 'test/imports.compiled.js'
         }
       }
     },
@@ -115,7 +115,7 @@ module.exports = function( grunt ) {
       },
       test: {
         files: {
-          'test/testModules.compiled.js.map': 'test/testModules.compiled.js'
+          'test/imports.compiled.js.map': 'test/imports.compiled.js'
         }
       }
     },
