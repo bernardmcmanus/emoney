@@ -1,4 +1,4 @@
-module.exports = function( grunt ) {
+module.exports = function( grunt ){
   // always print a stack trace if something goes wrong
   grunt.option( 'stack' , true );
 

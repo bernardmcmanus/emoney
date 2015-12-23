@@ -21,13 +21,11 @@
   function Test3(){}
 
   function Gnarly(){
-    E$.construct( this );
+    E$.call( this );
   }
-
-  Gnarly.prototype = E$.create({
-    tubes: function(){},
-    handleE$: function(){}
-  });
+  Gnarly.prototype = Object.create( E$.prototype );
+  Gnarly.prototype.tubes = function(){};
+  Gnarly.prototype.handleE$ = function(){};
 
   var emoney = E$( SEED );
 
@@ -37,6 +35,23 @@
     });
     it( 'should should define properties that are configurable' , function(){
       E$.call( emoney );
+    });
+    it( 'should be extendable' , function(){
+      var gnarly = new Gnarly();
+      for (var key in E$.prototype) {
+        if (key === 'handleE$') {
+          expect( Gnarly.prototype[key] ).to.not.equal( E$.prototype[key] );
+        }
+        else {
+          expect( Gnarly.prototype[key] ).to.equal( E$.prototype[key] );
+        }
+      }
+      expect( Gnarly.prototype ).to.include.keys( 'tubes' );
+      expect( Gnarly.prototype ).to.include.keys( 'handleE$' );
+      expect( gnarly.tubes ).to.be.a( 'function' );
+      expect( gnarly.handleE$ ).to.be.a( 'function' );
+      expect( gnarly.$__listeners ).to.be.an( 'object' );
+      expect( gnarly.handleE$ ).to.not.equal( Gnarly.prototype.handleE$ );
     });
     it( 'should be compatible with ES2015 classes' , function(){
       var emoneyExtended = new imports.E$Extended(),
@@ -399,6 +414,32 @@
       watcher1.$watch( emitter );
       emitter.$emit( 'something' , { isGnarly: true });
     });
+    it( 'should honor event.cancelBubble' , function(){
+      var emitter = E$({ name: 'emitter' }),
+        watcher1 = E$({ name: 'watcher1' }),
+        watcher2 = E$({ name: 'watcher2' }),
+        watcher3 = E$({ name: 'watcher3' }),
+        gotCalls = 0;
+      watcher3
+        .$when( 'something' , function(){
+          gotCalls++;
+        })
+        .$watch( watcher2 );
+      watcher2
+        .$when( 'something' , function( e ){
+          gotCalls++;
+          e.stopPropagation();
+        })
+        .$watch( watcher1 );
+      watcher1
+        .$when( 'something' , function( e ){
+          gotCalls++;
+        })
+        .$watch( emitter );
+      emitter.$emit( 'something' , function(){
+        expect( gotCalls ).to.equal( 2 );
+      });
+    });
   });
 
   describe( '#$unwatch' , function(){
@@ -417,40 +458,6 @@
       .forEach(function( emitter ) {
         expect( emitter.$__listeners ).to.have.length( 0 );
       });
-    });
-  });
-
-  describe( '::create' , function(){
-    it( 'should create a new object that extends the E$ prototype' , function(){
-      for (var key in E$.prototype) {
-        if (key === 'handleE$') {
-          expect( Gnarly.prototype[key] ).to.not.equal( E$.prototype[key] );
-        }
-        else {
-          expect( Gnarly.prototype[key] ).to.equal( E$.prototype[key] );
-        }
-      }
-      expect( Gnarly.prototype ).to.include.keys( 'tubes' );
-      expect( Gnarly.prototype ).to.include.keys( 'handleE$' );
-    });
-  });
-
-  describe( '::construct' , function(){
-    it( 'should define required properties for an instance created with E$' , function(){
-      var gnarly = new Gnarly();
-      expect( gnarly.tubes ).to.be.a( 'function' );
-      expect( gnarly.handleE$ ).to.be.a( 'function' );
-      expect( gnarly.$__listeners ).to.be.an( 'object' );
-      expect( gnarly.handleE$ ).to.not.equal( Gnarly.prototype.handleE$ );
-    });
-    it( 'should define unique listeners objects' , function(){
-      var gnarly1 = new Gnarly();
-      var gnarly2 = new Gnarly();
-      gnarly1.$when( 'rad' , function(){
-        expect( false ).to.be.true;
-      });
-      expect( gnarly2.$__listeners ).to.have.length( 0 );
-      gnarly2.$emit( 'rad' );
     });
   });
 

@@ -23,22 +23,6 @@ export default function E$( seed ){
   $_each( seed , function( value , key ){
     that[key] = value;
   });
-  E$.construct( that );
-}
-
-E$.is = function( subject ) {
-  return !!(subject && $_isObject( subject ) && 'handleE$' in subject);
-};
-
-E$.create = function( subjectProto ){
-  var extendedProto = Object.create( E$.prototype );
-  $_each( subjectProto , function( method , name ){
-    extendedProto[name] = method;
-  });
-  return extendedProto;
-};
-
-E$.construct = function( instance ){
   var listeners = new ListenerManager(),
     descriptors = {
       $__listeners: { value: listeners },
@@ -48,13 +32,17 @@ E$.construct = function( instance ){
         listeners.invoke( evt , args );
       }},
       handleE$: {
-        value: (instance.handleE$ || function(){}).bind( instance )
+        value: (that.handleE$ || function(){}).bind( that )
       },
     };
   $_each( descriptors , function( descriptor ){
     descriptor.configurable = true;
   });
-  Object.defineProperties( instance , descriptors );
+  Object.defineProperties( that , descriptors );
+}
+
+E$.is = function( subject ) {
+  return !!subject && $_isObject( subject ) && $_isFunction( subject.handleE$ );
 };
 
 E$.prototype = {
