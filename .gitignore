@@ -1,7 +1,8 @@
 node_modules
 tmp
+compiled
 test/emoney.js
-test/testModules.transpiled.js
+*.compiled.js*
 
 # OS generated files #
 ######################

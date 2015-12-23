@@ -1,47 +1,21 @@
-import {
-  $CANCEL_BUBBLE,
-  $DEFAULT_PREVENTED,
-  $PROTO
-} from 'static/constants';
-import { $_uts } from 'static/shared';
+import { WILDCARD } from 'listener-manager';
 
-
-export default function Event( target , type ) {
+export default function Event( target , type ){
+  if (type == WILDCARD) {
+    throw new Error( 'Invalid event type: ' + WILDCARD + '.' );
+  }
   var that = this;
   that.target = target;
   that.type = type;
-  that[$CANCEL_BUBBLE] = false;
-  that[$DEFAULT_PREVENTED] = false;
-  that.timeStamp = $_uts();
+  that.cancelBubble = false;
+  that.defaultPrevented = false;
+  that.timeStamp = Date.now();
 }
 
-
-Event[$PROTO] = {
-
-  preventDefault: function() {
-    this[$DEFAULT_PREVENTED] = true;
-  },
-
-  stopPropagation: function() {
-    this[$CANCEL_BUBBLE] = true;
-  }
+Event.prototype.preventDefault = function(){
+  this.defaultPrevented = true;
 };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Event.prototype.stopPropagation = function(){
+  this.cancelBubble = true;
+};
