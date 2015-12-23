@@ -1,4 +1,4 @@
-/*! emoney - 1.0.0 - Bernard McManus - 028f23f - 2015-12-23 */
+/*! emoney - 1.0.0 - Bernard McManus - 55adcd2 - 2015-12-23 */
 
 (function($global,Array,Object,Date,Error,UNDEFINED){
 "use strict";
@@ -191,13 +191,13 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var WILDCARD = exports.WILDCARD = '*';
 
+function ListenerManager() {
+  Array.call(this);
+}
+
 function enqueue(fn) {
   _stack2.default.enqueue(fn);
   _stack2.default.flush();
-}
-
-function ListenerManager() {
-  Array.call(this);
 }
 
 ListenerManager.prototype = Object.create(Array.prototype);
@@ -280,22 +280,6 @@ function E$(seed) {
   (0, _helpers.$_each)(seed, function (value, key) {
     that[key] = value;
   });
-  E$.construct(that);
-}
-
-E$.is = function (subject) {
-  return !!(subject && (0, _helpers.$_isObject)(subject) && 'handleE$' in subject);
-};
-
-E$.create = function (subjectProto) {
-  var extendedProto = Object.create(E$.prototype);
-  (0, _helpers.$_each)(subjectProto, function (method, name) {
-    extendedProto[name] = method;
-  });
-  return extendedProto;
-};
-
-E$.construct = function (instance) {
   var listeners = new _listenerManager2.default(),
       descriptors = {
     $__listeners: { value: listeners },
@@ -305,13 +289,17 @@ E$.construct = function (instance) {
         listeners.invoke(evt, args);
       } },
     handleE$: {
-      value: (instance.handleE$ || function () {}).bind(instance)
+      value: (that.handleE$ || function () {}).bind(that)
     }
   };
   (0, _helpers.$_each)(descriptors, function (descriptor) {
     descriptor.configurable = true;
   });
-  Object.defineProperties(instance, descriptors);
+  Object.defineProperties(that, descriptors);
+}
+
+E$.is = function (subject) {
+  return !!subject && (0, _helpers.$_isObject)(subject) && (0, _helpers.$_isFunction)(subject.handleE$);
 };
 
 E$.prototype = {
