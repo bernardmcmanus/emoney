@@ -1,4 +1,4 @@
-/*! emoney - 1.0.1 - Bernard McManus - 4a7e27f - 2015-12-31 */
+/*! emoney - 1.0.2 - Bernard McManus - 37ad603 - 2015-12-31 */
 
 (function($global,Array,Object,Date,Error,UNDEFINED){
 "use strict";
@@ -358,11 +358,11 @@ E$.prototype = {
       _.each(eventTypes, function (type) {
         var evt = new _event2.default(that, type);
         that.$__listeners.invoke(evt, listenerArgs);
-        if (_.isFunction(emitCb) && !evt.defaultPrevented) {
-          _stack2.default.digest(function () {
+        _stack2.default.digest(function () {
+          if (_.isFunction(emitCb) && !evt.defaultPrevented) {
             emitCb.apply(UNDEFINED, [].concat(evt, listenerArgs));
-          });
-        }
+          }
+        });
       });
     });
     return that;

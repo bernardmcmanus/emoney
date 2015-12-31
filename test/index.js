@@ -287,25 +287,28 @@
         actual = [],
         expected = [ 0 , 1 , 2 , 3 ];
       e1
-        .$when( 'e1' , function(){
+        .$when( 'e1' , function( e ){
+          actual.push( actual.length );
           e2
-            .$when( 'e2' , function(){
+            .$when( 'e2' , function( e ){
               actual.push( actual.length );
             })
-            .$when( 'e2' , function(){
+            .$when( 'e2' , function( e ){
               actual.push( actual.length );
+              e.preventDefault();
             })
-            .$emit( 'e2' , function(){
-              expect( actual ).to.eql( expected );
+            .$emit( 'e2' , function( e ){
+              actual.push( actual.length );
             });
-          actual.push( actual.length );
         })
-        .$when( 'e1' , function(){
+        .$when( 'e1' , function( e ){
           actual.push( actual.length );
+          e.preventDefault();
         })
-        .$emit( 'e1' , function(){
-          expect( actual ).to.eql( expected );
+        .$emit( 'e1' , function( e ){
+          actual.push( actual.length );
         });
+      expect( actual ).to.eql( expected );
     });
   });
 

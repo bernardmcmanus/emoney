@@ -90,11 +90,11 @@ E$.prototype = {
       _.each( eventTypes , function( type ){
         var evt = new Event( that , type );
         that.$__listeners.invoke( evt , listenerArgs );
-        if (_.isFunction( emitCb ) && !evt.defaultPrevented) {
-          stack.digest(function(){
+        stack.digest(function(){
+          if (_.isFunction( emitCb ) && !evt.defaultPrevented) {
             emitCb.apply( UNDEFINED , [].concat( evt , listenerArgs ));
-          });
-        }
+          }
+        });
       });
     });
     return that;
