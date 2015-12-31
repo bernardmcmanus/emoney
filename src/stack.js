@@ -8,6 +8,10 @@ export default stack = Object.create({
   get index(){ return index },
   get length(){ return length },
   get inprog(){ return inprog },
+  digest: function( fn ){
+    stack.enqueue( fn );
+    stack.flush();
+  },
   enqueue: function( fn ){
     stack[length] = fn;
     length++;

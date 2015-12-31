@@ -1,22 +1,22 @@
-export function $_isObject( subject ){
+export function isObject( subject ){
   return subject && typeof subject == 'object';
 }
 
-export function $_isFunction( subject ){
+export function isFunction( subject ){
   return typeof subject == 'function';
 }
 
-export function $_toArray( subject ){
+export function toArray( subject ){
   return Array.prototype.slice.call( subject , 0 );
 }
 
-export function $_each( subject , cb ){
+export function each( subject , cb ){
   if (Array.isArray( subject )) {
     for (var i = 0; i < subject.length; i++) {
       cb( subject[i] , i );
     }
   }
-  else if ($_isObject( subject )) {
+  else if (isObject( subject )) {
     for (var key in subject) {
       if (subject.hasOwnProperty( key )) {
         cb( subject[key] , key );

@@ -281,6 +281,32 @@
         });
       expect( emoney.$__listeners ).to.have.length( 0 );
     });
+    it( 'should enqueue the emit callback' , function(){
+      var e1 = E$(),
+        e2 = E$(),
+        actual = [],
+        expected = [ 0 , 1 , 2 , 3 ];
+      e1
+        .$when( 'e1' , function(){
+          e2
+            .$when( 'e2' , function(){
+              actual.push( actual.length );
+            })
+            .$when( 'e2' , function(){
+              actual.push( actual.length );
+            })
+            .$emit( 'e2' , function(){
+              expect( actual ).to.eql( expected );
+            });
+          actual.push( actual.length );
+        })
+        .$when( 'e1' , function(){
+          actual.push( actual.length );
+        })
+        .$emit( 'e1' , function(){
+          expect( actual ).to.eql( expected );
+        });
+    });
   });
 
   describe( '#$dispel' , function(){

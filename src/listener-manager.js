@@ -1,16 +1,11 @@
 import EventListener from 'event-listener';
 import stack from 'stack';
-import { $_each } from 'helpers';
+import * as _ from 'helpers';
 
 export const WILDCARD = '*';
 
 export default function ListenerManager(){
   Array.call( this );
-}
-
-function enqueue( fn ){
-  stack.enqueue( fn );
-  stack.flush();
 }
 
 ListenerManager.prototype = Object.create( Array.prototype );
@@ -19,7 +14,7 @@ ListenerManager.prototype.constructor = ListenerManager;
 
 ListenerManager.prototype.add = function( types , fn , args ){
   var that = this;
-  enqueue(function(){
+  stack.digest(function(){
     that.push(
       new EventListener( types , fn , args )
     );
@@ -28,7 +23,7 @@ ListenerManager.prototype.add = function( types , fn , args ){
 
 ListenerManager.prototype.invoke = function( evt , args ){
   var that = this;
-  enqueue(function(){
+  stack.digest(function(){
     that.forEach(function( evtListener ){
       evtListener.invoke( evt , args );
     });
@@ -38,8 +33,8 @@ ListenerManager.prototype.invoke = function( evt , args ){
 ListenerManager.prototype.remove = function( removeTypes , fn , wild ){
   var that = this;
   removeTypes = [].concat( removeTypes );
-  enqueue(function(){
-    $_each( removeTypes , function( removeType ){
+  stack.digest(function(){
+    _.each( removeTypes , function( removeType ){
       var len = that.length,
         i = 0,
         evtListener,

@@ -1,14 +1,10 @@
 import Event from 'event';
+import stack from 'stack';
+import * as _ from 'helpers';
 import {
   WILDCARD,
   default as ListenerManager
 } from 'listener-manager';
-import {
-  $_toArray,
-  $_isObject,
-  $_isFunction,
-  $_each
-} from 'helpers';
 import {
   whenParser,
   emitParser,
@@ -20,14 +16,14 @@ export default function E$( seed ){
   if (that == $global || that == UNDEFINED) {
     return new E$( seed );
   }
-  $_each( seed , function( value , key ){
+  _.each( seed , function( value , key ){
     that[key] = value;
   });
   var listeners = new ListenerManager(),
     descriptors = {
       $__listeners: { value: listeners },
       $__handleWild: { value: function(){
-        var args = $_toArray( arguments ),
+        var args = _.toArray( arguments ),
           evt = args.shift();
         listeners.invoke( evt , args );
       }},
@@ -35,14 +31,14 @@ export default function E$( seed ){
         value: (that.handleE$ || function(){}).bind( that )
       },
     };
-  $_each( descriptors , function( descriptor ){
+  _.each( descriptors , function( descriptor ){
     descriptor.configurable = true;
   });
   Object.defineProperties( that , descriptors );
 }
 
 E$.is = function( subject ) {
-  return !!subject && $_isObject( subject ) && $_isFunction( subject.handleE$ );
+  return !!subject && _.isObject( subject ) && _.isFunction( subject.handleE$ );
 };
 
 E$.prototype = {
@@ -50,7 +46,7 @@ E$.prototype = {
   $watch: function( emitters ){
     var that = this;
     emitters = [].concat( emitters );
-    $_each( emitters , function( emitter , key ){
+    _.each( emitters , function( emitter , key ){
       emitter
         .$when( WILDCARD , that )
         .$when( WILDCARD , that.$__handleWild );
@@ -60,7 +56,7 @@ E$.prototype = {
   $unwatch: function( emitters ){
     var that = this;
     emitters = [].concat( emitters );
-    $_each( emitters , function( emitter ){
+    _.each( emitters , function( emitter ){
       emitter
         .$dispel( WILDCARD , true , that )
         .$dispel( WILDCARD , true , that.$__handleWild );
@@ -91,11 +87,13 @@ E$.prototype = {
   $emit: function(){
     var that = this;
     emitParser( that , arguments , function( eventTypes , listenerArgs , emitCb ){
-      $_each( eventTypes , function( type ){
+      _.each( eventTypes , function( type ){
         var evt = new Event( that , type );
         that.$__listeners.invoke( evt , listenerArgs );
-        if ($_isFunction( emitCb ) && !evt.defaultPrevented) {
-          emitCb.apply( UNDEFINED , [].concat( evt , listenerArgs ));
+        if (_.isFunction( emitCb ) && !evt.defaultPrevented) {
+          stack.digest(function(){
+            emitCb.apply( UNDEFINED , [].concat( evt , listenerArgs ));
+          });
         }
       });
     });
