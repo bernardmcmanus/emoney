@@ -12,22 +12,22 @@ Overview
 ```javascript
 // Standalone
 var emoney = E$({
-  handleE$: function(){ ... }
+	handleE$: function(){ ... }
 });
 
 // ES5
 function E$Extended(){
-  E$.call( this );
+	E$.call( this );
 }
 E$Extended.prototype = Object.create( E$.prototype );
 E$Extended.prototype.handleE$ = function(){ ... };
 
 // ES6
 class E$Extended {
-  constructor(){
-    super();
-  }
-  handleE$(){ ... }
+	constructor(){
+		super();
+	}
+	handleE$(){ ... }
 }
 ```
 
@@ -35,25 +35,25 @@ class E$Extended {
 
 ```javascript
 emoney
-  .$when( 'loading' , function( e , pct ){
-    console.log( 'loading... (%s%)' , pct );
-  })
-  .$when( 'ready' , function(){
-    console.log( 'ready!' );
-  })
-  .$when( 'error' , function( e , err ){
-    console.error( err.stack );
-  });
+	.$when( 'loading' , function( e , pct ){
+		console.log( 'loading... (%s%)' , pct );
+	})
+	.$when( 'ready' , function(){
+		console.log( 'ready!' );
+	})
+	.$when( 'error' , function( e , err ){
+		console.error( err.stack );
+	});
 ```
 
 > E$ instances can communicate via the `handleE$` method.
 
 ```javascript
 var watcher = E$({
-  handleE$: function( e , str , obj ){
-    expect( str ).to.eql( 'awesome' );
-    expect( obj ).to.eql({ rad: true });
-  }
+	handleE$: function( e , str , obj ){
+		expect( str ).to.eql( 'awesome' );
+		expect( obj ).to.eql({ rad: true });
+	}
 });
 watcher.$watch( emitter );
 emitter.$emit( 'gnarly' , [ 'awesome' , { rad: true }]);
@@ -65,20 +65,20 @@ emitter.$emit( 'gnarly' , [ 'awesome' , { rad: true }]);
 var called = false;
 
 watcher2
-  .$watch( watcher1 )
-  .$when( 'gnarly' , function( e ){
-    called = true;
-  });
+	.$watch( watcher1 )
+	.$when( 'gnarly' , function( e ){
+		called = true;
+	});
 
 watcher1
-  .$watch( emitter )
-  .$when( 'gnarly' , function( e ){
-    expect( e.target ).to.equal( emitter );
-    e.stopPropagation();
-  });
+	.$watch( emitter )
+	.$when( 'gnarly' , function( e ){
+		expect( e.target ).to.equal( emitter );
+		e.stopPropagation();
+	});
 
 emitter.$emit( 'gnarly' , function(){
-  expect( called ).to.be.false;
+	expect( called ).to.be.false;
 });
 ```
 
@@ -241,14 +241,14 @@ Events
 ```javascript
 emoney
 .$when( 'gnarly' , function( e ){
-  e.preventDefault();
-  console.log( 'handler1' );
+	e.preventDefault();
+	console.log( 'handler1' );
 })
 .$when( 'gnarly' , function(){
-  console.log( 'handler2' );
+	console.log( 'handler2' );
 })
 .$emit( 'gnarly' , function(){
-  console.log( 'callback' );
+	console.log( 'callback' );
 });
 
 /**
@@ -264,14 +264,14 @@ emoney
 ```javascript
 emoney
 .$when( 'gnarly' , function( e ){
-  e.stopPropagation();
-  console.log( 'handler1' );
+	e.stopPropagation();
+	console.log( 'handler1' );
 })
 .$when( 'gnarly' , function(){
-  console.log( 'handler2' );
+	console.log( 'handler2' );
 })
 .$emit( 'gnarly' , function(){
-  console.log( 'callback' );
+	console.log( 'callback' );
 });
 
 /**
@@ -290,4 +290,4 @@ emoney
 Build & Test
 ------------
 
-    npm i && npm run build
+		npm i && npm run build
