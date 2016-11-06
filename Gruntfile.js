@@ -17,24 +17,6 @@ module.exports = function( grunt ){
     'import-clean': {
       all: 'src/**/*.js'
     },
-    update_json: {
-      options: {
-        src: 'package.json',
-        indent: 2
-      },
-      bower: {
-        dest: 'bower.json',
-        fields: [
-          'name',
-          'version',
-          'main',
-          'description',
-          'keywords',
-          'homepage',
-          'license'
-        ]
-      }
-    },
     browserify: {
       options: {
         transform: [
@@ -177,7 +159,6 @@ module.exports = function( grunt ){
     'grunt-contrib-uglify',
     'grunt-contrib-watch',
     'grunt-import-clean',
-    'grunt-update-json',
     'grunt-browserify',
     'grunt-gitinfo',
     'grunt-contrib-copy',
@@ -194,7 +175,6 @@ module.exports = function( grunt ){
     'clean:test',
     'uglify',
     'copy:dist',
-    'update_json',
     'release-describe'
   ]);
 

@@ -3,9 +3,6 @@ E$
 > A lightweight event emitter for clients and servers.
 
 [![travis-ci](https://travis-ci.org/elnarddogg/emoney.svg)](https://travis-ci.org/elnarddogg/emoney)
-[![david-dm](https://david-dm.org/elnarddogg/emoney.svg)](https://david-dm.org/elnarddogg/emoney)
-![npm](https://img.shields.io/npm/v/npm.svg)
-![bower](https://img.shields.io/bower/v/bootstrap.svg)
 
 Overview
 --------

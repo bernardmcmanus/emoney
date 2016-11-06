@@ -4,7 +4,6 @@
   "description": "A lightweight event emitter for clients and servers",
   "main": "dist/emoney.js",
   "scripts": {
-    "install": "bower install",
     "test": "grunt test",
     "build": "grunt"
   },
@@ -14,7 +13,6 @@
   "devDependencies": {
     "babel-preset-es2015": "^6.3.13",
     "babelify": "^7.2.0",
-    "bower": "^1.7.1",
     "browserify-derequire": "^0.9.4",
     "chai": "^3.4.1",
     "colors": "^1.0.3",
@@ -33,7 +31,6 @@
     "grunt-gitinfo": "^0.1.7",
     "grunt-import-clean": "^0.1.0",
     "grunt-mocha-test": "^0.12.7",
-    "grunt-update-json": "^0.2.1",
     "grunt-wrap": "^0.3.0",
     "mocha": "^2.3.4"
   },
