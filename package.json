@@ -1,11 +1,12 @@
 {
   "name": "emoney",
-  "version": "1.1.0",
-  "description": "A lightweight event emitter for clients and servers",
+  "version": "1.1.1",
+  "description": "A lightweight, isomorphic event emitter",
   "main": "dist/emoney.js",
   "scripts": {
     "test": "grunt test",
-    "build": "grunt"
+    "build": "grunt",
+    "prepublish": "npm run build"
   },
   "config": {
     "banner": "/*! <%= pkg.name %> - <%= pkg.version %> - <%= pkg.author.name %> - <%= grunt.config.data.gitinfo.local.branch.current.shortSHA %> - <%= grunt.template.today('yyyy-mm-dd') %> */\n"
