@@ -2,7 +2,7 @@ E$
 ==
 > A lightweight event emitter for clients and servers.
 
-[![travis-ci](https://travis-ci.org/elnarddogg/emoney.svg)](https://travis-ci.org/elnarddogg/emoney)
+[![travis-ci](https://travis-ci.org/bernardmcmanus/emoney.svg)](https://travis-ci.org/bernardmcmanus/emoney)
 
 Overview
 --------
