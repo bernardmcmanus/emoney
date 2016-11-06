@@ -1,85 +1,67 @@
 E$
 ==
-> A lightweight event emitter for clients and servers.
+> A lightweight, isomorphic event emitter.
 
 [![travis-ci](https://travis-ci.org/bernardmcmanus/emoney.svg)](https://travis-ci.org/bernardmcmanus/emoney)
 
 Overview
 --------
 
-> E$ can be used as a standalone constructor, or to extend prototypical objects.
+> E$ can be used standalone or inherited by other classes.
 
-```javascript
+```js
 // Standalone
-var emoney = E$({
-	handleE$: function() { ... }
+const emoney = E$({
+	handleE$() { ... }
 });
 
-// ES5
-function E$Extended() {
-	E$.call(this);
-}
-E$Extended.prototype = Object.create(E$.prototype);
-E$Extended.prototype.handleE$ = function() { ... };
-
-// ES6
-class E$Extended {
-	constructor() {
-		super();
-	}
+// Inherited
+class E$Extended extends E$ {
 	handleE$() { ... }
 }
 ```
 
 > E$ provides a clean way to interface with object instances.
 
-```javascript
+```js
 emoney
-	.$when('loading', function(e, pct) {
-		console.log('loading... (%s%)', pct);
-	})
-	.$when('ready', function() {
-		console.log('ready!');
-	})
-	.$when('error', function(e, err) {
-		console.error(err.stack);
-	});
+	.$when('loading', (e, pct) => console.log('loading... (%s%)', pct))
+	.$when('ready', () => console.log('ready!'))
+	.$when('error', (e, err) => console.error(err.stack));
 ```
 
 > E$ instances can communicate via the `handleE$` method.
 
-```javascript
-var watcher = E$({
-	handleE$: function(e, str, obj) {
+```js
+const emitter = E$();
+const watcher = E$({
+	handleE$(e, str, obj) {
 		expect(str).to.eql('awesome');
 		expect(obj).to.eql({ rad: true });
 	}
 });
 watcher.$watch(emitter);
 emitter.$emit('gnarly', ['awesome', { rad: true }]);
+expect(watcher.handleE$).to.have.been.called.once;
 ```
 
 > E$ can be used to create a DOM-like event tree.
 
-```javascript
-var called = false;
+```js
+const emitter = E$();
+const watcher1 = E$();
+const watcher2 = E$();
+const spy = sinon.spy();
 
 watcher2
 	.$watch(watcher1)
-	.$when('gnarly', function(e) {
-		called = true;
-	});
+	.$when('gnarly', spy);
 
 watcher1
 	.$watch(emitter)
-	.$when('gnarly', function(e) {
-		expect(e.target).to.equal(emitter);
-		e.stopPropagation();
-	});
+	.$when('gnarly', e => e.stopPropagation());
 
-emitter.$emit('gnarly', function() {
-	expect(called).to.be.false;
-});
+emitter.$emit('gnarly', () => expect(spy).to.have.not.been.called);
 ```
 
 Methods
@@ -89,21 +71,21 @@ Methods
 
 > Returns true if subject is E$-ish, false otherwise.
 
-```javascript
-var emoney = E$();
-var emoneyIsh = new E$Extended();
-var somethingElse = new SomethingElse();
+```js
+const emoney = E$();
+const emoneyIsh = new E$Extended();
+const somethingElse = new SomethingElse();
 
 emoney instanceof E$;     // true
-E$.is(emoney);          // true
+E$.is(emoney);            // true
 
 emoneyIsh instanceof E$;  // false
-E$.is(emoneyIsh);       // true
+E$.is(emoneyIsh);         // true
 
-E$.is(somethingElse);   // false
+E$.is(somethingElse);     // false
 ```
 
-### .$when(events, args<sub>_opt_</sub>, handler<sub>_opt_</sub>) &#8594; _`{instance}`_
+### .$when(events, args<sub>_opt_</sub>, fn<sub>_opt_</sub>) &#8594; _`{instance}`_
 
 > Adds an event listener.
 
@@ -111,32 +93,32 @@ E$.is(somethingElse);   // false
 | --------- | ---- | ----------- | -------- |
 | `events` | `string`<br>`array` | The event(s) to be handled. | __yes__ |
 | `args` | `variant`<br>`array` | The argument(s) to be bound to the event handler. | no |
-| `handler` | `function`<br>`E$` | The event handler.<br>If `E$.is(handler) == true`, the event will be bound to `instance.handleE$`.<br>If `handler` is falsy, the event will be bound to `emoney.handleE$`. | no |
+| `fn` | `function`<br>`E$` | The event handler.<br>If `E$.is(fn) == true`, the event will be bound to `instance.handleE$`.<br>If `fn` is falsy, the event will be bound to `emoney.handleE$`. | no |
 
-```javascript
+```js
 // basic use
-emoney.$when('gnarly', function() { ... });
+emoney.$when('gnarly', () => { ... });
 
 // bind an argument to multiple events
-emoney.$when(['gnarly', 'rad'], 'arg', function() { ... });
+emoney.$when(['gnarly', 'rad'], 'arg', () => { ... });
 ```
 
-### .$once(events, args<sub>_opt_</sub>, handler<sub>_opt_</sub>) &#8594; _`{instance}`_
+### .$once(events, args<sub>_opt_</sub>, fn<sub>_opt_</sub>) &#8594; _`{instance}`_
 
 > Adds an event listener that is removed after the first time it is invoked.
 
 | Parameter | Type | Description | Required |
 | --------- | ---- | ----------- | -------- |
 | `events` | `string`<br>`array` | The event(s) to be handled. | __yes__ |
-| `args` | `variant`<br>`array` | The argument(s) to be bound to the event handler. | no |
-| `handler` | `function`<br>`E$` | The event handler. | no |
+| `args` | `variant`<br>`array` | The argument(s) to be bound to the event fn. | no |
+| `fn` | `function`<br>`E$` | The event handler. | no |
 
-```javascript
+```js
 // basic use
-emoney.$once('gnarly', function() { ... });
+emoney.$once('gnarly', () => { ... });
 
 // bind an argument to multiple events
-emoney.$once(['gnarly', 'rad'], 'arg', function() { ... });
+emoney.$once(['gnarly', 'rad'], 'arg', () => { ... });
 ```
 
 ### .$emit(events, args<sub>_opt_</sub>, callback<sub>_opt_</sub>) &#8594; _`{instance}`_
@@ -149,18 +131,18 @@ emoney.$once(['gnarly', 'rad'], 'arg', function() { ... });
 | `args` | `variant`<br>`array` | The argument(s) to be passed to the event handler. | no |
 | `callback` | `function` | A function to be executed at the end of the event chain (see [event behavior](#behavior)). | no |
 
-```javascript
+```js
 // basic use
-emoney.$emit('gnarly', function() { ... });
+emoney.$emit('gnarly', () => { ... });
 
 // pass an argument to multiple event handlers
-emoney.$emit(['gnarly', 'rad'], 'arg', function() { ... });
+emoney.$emit(['gnarly', 'rad'], 'arg', () => { ... });
 
 // pass multiple arguments to an event handler
-emoney.$emit('gnarly', ['arg1', 'arg2'], function() { ... });
+emoney.$emit('gnarly', ['arg1', 'arg2'], () => { ... });
 ```
 
-### .$dispel(events, wild<sub>_opt_</sub>, handler<sub>_opt_</sub>) &#8594; _`{instance}`_
+### .$dispel(events, wild<sub>_opt_</sub>, fn<sub>_opt_</sub>) &#8594; _`{instance}`_
 
 > Removes an event listener.
 
@@ -168,20 +150,20 @@ emoney.$emit('gnarly', ['arg1', 'arg2'], function() { ... });
 | --------- | ---- | ----------- | -------- |
 | `events` | `string`<br>`array`<br>`null` | The event(s) to be removed. | __yes__ |
 | `wild` | `boolean` | A boolean value denoting whether handlers bound to the wildcard event should be removed. | no |
-| `handler` | `function`<br>`E$` | The event handler. | no |
+| `fn` | `function`<br>`E$` | The event handler. | no |
 
-```javascript
-// remove any gnarly listeners bound to handlerFn
-emoney.$dispel('gnarly', handlerFn);
+```js
+// remove any gnarly listeners bound to fn
+emoney.$dispel('gnarly', fn);
 
 // remove all gnarly or rad listeners bound to any handler
 emoney.$dispel(['gnarly', 'rad']);
 
-// remove all listeners bound to handlerFn except wildcard listeners
-emoney.$dispel(null, handlerFn);
+// remove all listeners bound to fn except wildcard listeners
+emoney.$dispel(null, fn);
 
-// remove all listeners bound to handlerFn
-emoney.$dispel(null, true, handlerFn);
+// remove all listeners bound to fn
+emoney.$dispel(null, true, fn);
 
 // remove all listeners
 emoney.$dispel(null, true);
@@ -195,7 +177,7 @@ emoney.$dispel(null, true);
 | --------- | ---- | ----------- | -------- |
 | `emitters` | `E$`<br>`array` | The E$ instance(s) to watch. | __yes__ |
 
-```javascript
+```js
 // watch a single emitter
 listener.$watch(emitter1);
 
@@ -211,7 +193,7 @@ listener.$watch([emitter1, emitter2]);
 | --------- | ---- | ----------- | -------- |
 | `emitters` | `E$`<br>`array` | The E$ instance(s) to stop watching. | __yes__ |
 
-```javascript
+```js
 // stop watching a single emitter
 listener.$unwatch(emitter1);
 
@@ -238,22 +220,18 @@ Events
 
 > Prevents the $emit callback from being executed.
 
-```javascript
+```js
 emoney
-.$when('gnarly', function(e) {
-	e.preventDefault();
-	console.log('handler1');
-})
-.$when('gnarly', function() {
-	console.log('handler2');
-})
-.$emit('gnarly', function() {
-	console.log('callback');
-});
+	.$when('gnarly', (e) => {
+		e.preventDefault();
+		console.log('fn1');
+	})
+	.$when('gnarly', () => console.log('fn2'))
+	.$emit('gnarly', () => console.log('cb'));
 
 /**
- * > 'handler1'
- * > 'handler2'
+ * > 'fn1'
+ * > 'fn2'
  */
 ```
 
@@ -261,22 +239,18 @@ emoney
 
 > Stops execution of the event chain and executes the emit callback.
 
-```javascript
+```js
 emoney
-.$when('gnarly', function(e) {
-	e.stopPropagation();
-	console.log('handler1');
-})
-.$when('gnarly', function() {
-	console.log('handler2');
-})
-.$emit('gnarly', function() {
-	console.log('callback');
-});
+	.$when('gnarly', (e) => {
+		e.stopPropagation();
+		console.log('fn1');
+	})
+	.$when('gnarly', () => console.log('fn2'))
+	.$emit('gnarly', () => console.log('cb'));
 
 /**
- * > 'handler1'
- * > 'callback'
+ * > 'fn1'
+ * > 'cb'
  */
 ```
 
@@ -290,4 +264,4 @@ emoney
 Build & Test
 ------------
 
-		npm i && npm run build
+	npm i && npm run build

@@ -42,8 +42,7 @@
     "javascript",
     "event",
     "emitter",
-    "client",
-    "server"
+    "isomorphic"
   ],
   "author": {
     "name": "Bernard McManus",
