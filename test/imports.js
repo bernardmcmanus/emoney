@@ -8,10 +8,10 @@ import {
 } from 'listener-manager';
 
 class E$Extended extends E$ {
-	constructor(){
+	constructor() {
 		super();
 	}
-	handleE$( e , cb ){
+	handleE$(e, cb) {
 		if (cb) {
 			cb();
 		}

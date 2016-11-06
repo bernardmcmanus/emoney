@@ -1,8 +1,8 @@
 import { WILDCARD } from 'listener-manager';
 
-export default function Event( target , type ){
+export default function Event(target, type) {
 	if (type == WILDCARD) {
-		throw new Error( 'Invalid event type: ' + WILDCARD + '.' );
+		throw new Error('Invalid event type: ' + WILDCARD + '.');
 	}
 	var that = this;
 	that.target = target;
@@ -12,10 +12,10 @@ export default function Event( target , type ){
 	that.timeStamp = Date.now();
 }
 
-Event.prototype.preventDefault = function(){
+Event.prototype.preventDefault = function() {
 	this.defaultPrevented = true;
 };
 
-Event.prototype.stopPropagation = function(){
+Event.prototype.stopPropagation = function() {
 	this.cancelBubble = true;
 };

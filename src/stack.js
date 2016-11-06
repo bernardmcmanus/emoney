@@ -5,18 +5,18 @@ var stack,
 
 export default stack = Object.create({
 	/* jshint -W033 */
-	get index(){ return index },
-	get length(){ return length },
-	get inprog(){ return inprog },
-	digest: function( fn ){
-		stack.enqueue( fn );
+	get index() { return index },
+	get length() { return length },
+	get inprog() { return inprog },
+	digest: function(fn) {
+		stack.enqueue(fn);
 		stack.flush();
 	},
-	enqueue: function( fn ){
+	enqueue: function(fn) {
 		stack[length] = fn;
 		length++;
 	},
-	flush: function(){
+	flush: function() {
 		var fn, caught;
 		if (!inprog) {
 			inprog = true;
@@ -25,7 +25,7 @@ export default stack = Object.create({
 				try {
 					fn();
 				}
-				catch( err ){
+				catch(err) {
 					caught = err;
 					empty();
 					break;
@@ -39,11 +39,11 @@ export default stack = Object.create({
 	}
 });
 
-function drop(){
+function drop() {
 	delete stack[index];
 }
 
-function empty(){
+function empty() {
 	index = length;
 	while (index > 0) {
 		index--;
@@ -52,7 +52,7 @@ function empty(){
 	length = index = 0;
 }
 
-function next(){
+function next() {
 	var fn = stack[index];
 	drop();
 	index++;

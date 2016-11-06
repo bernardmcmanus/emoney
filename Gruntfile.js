@@ -1,14 +1,14 @@
-module.exports = function( grunt ){
+module.exports = function(grunt) {
 	// always print a stack trace if something goes wrong
-	grunt.option( 'stack' , true );
+	grunt.option('stack', true);
 
 	grunt.initConfig({
-		pkg: grunt.file.readJSON( 'package.json' ),
+		pkg: grunt.file.readJSON('package.json'),
 		gitinfo: {},
 		clean: {
-			'dist': [ 'dist' ],
-			'compiled': [ 'compiled' ],
-			'test': [ 'test/*.compiled.js*' ]
+			'dist': ['dist'],
+			'compiled': ['compiled'],
+			'test': ['test/*.compiled.js*']
 		},
 		jshint: {
 			all: 'src/**/*.js',
@@ -20,13 +20,13 @@ module.exports = function( grunt ){
 		browserify: {
 			options: {
 				transform: [
-					[ 'babelify' , { presets: [ 'es2015' ]}]
+					['babelify', { presets: ['es2015']}]
 				],
 				plugin: [
-					[ 'browserify-derequire' ]
+					['browserify-derequire']
 				],
 				browserifyOptions: {
-					'paths': [ 'src' ],
+					'paths': ['src'],
 					'debug': 'debug',
 					'standalone': 'E$'
 				}
@@ -44,7 +44,7 @@ module.exports = function( grunt ){
 		},
 		wrap: {
 			options: {
-				args: (function(){
+				args: (function() {
 					var args = [
 						['$global','this'],
 						'Array',
@@ -54,17 +54,17 @@ module.exports = function( grunt ){
 						['UNDEFINED']
 					];
 
-					var leadingWrapArgs = args.map(function( arg ){
-						return Array.isArray( arg ) ? arg.shift() : arg;
+					var leadingWrapArgs = args.map(function(arg) {
+						return Array.isArray(arg) ? arg.shift() : arg;
 					})
-					.filter(function( arg ){
+					.filter(function(arg) {
 						return !!arg;
 					});
 
-					var trailingWrapArgs = args.map(function( arg ){
-						return Array.isArray( arg ) ? arg.pop() : arg;
+					var trailingWrapArgs = args.map(function(arg) {
+						return Array.isArray(arg) ? arg.pop() : arg;
 					})
-					.filter(function( arg ){
+					.filter(function(arg) {
 						return !!arg;
 					});
 
@@ -74,7 +74,7 @@ module.exports = function( grunt ){
 					};
 				}()),
 				wrapper: [
-					'(function(<%= wrap.options.args.leading %>){\n"use strict";\n',
+					'(function(<%= wrap.options.args.leading %>) {\n"use strict";\n',
 					'\n}(<%= wrap.options.args.trailing %>))'
 				]
 			},
@@ -137,8 +137,8 @@ module.exports = function( grunt ){
 		watch: {
 			options: { interrupt: true },
 			debug: {
-				files: [ 'src/**/*.js' , 'test/!(*.compiled).js' ],
-				tasks: [ 'test' ]
+				files: ['src/**/*.js', 'test/!(*.compiled).js'],
+				tasks: ['test']
 			}
 		},
 		'release-describe': {
@@ -150,7 +150,7 @@ module.exports = function( grunt ){
 		},
 	});
 	
-	grunt.loadTasks( 'tasks' );
+	grunt.loadTasks('tasks');
 	
 	[
 		'grunt-contrib-jshint',
@@ -166,9 +166,9 @@ module.exports = function( grunt ){
 		'grunt-exorcise',
 		'grunt-wrap'
 	]
-	.forEach( grunt.loadNpmTasks );
+	.forEach(grunt.loadNpmTasks);
 
-	grunt.registerTask( 'default' , [
+	grunt.registerTask('default', [
 		'clean',
 		'build',
 		'test',
@@ -178,7 +178,7 @@ module.exports = function( grunt ){
 		'release-describe'
 	]);
 
-	grunt.registerTask( 'build' , [
+	grunt.registerTask('build', [
 		'jshint',
 		'import-clean',
 		'gitinfo',
@@ -188,17 +188,17 @@ module.exports = function( grunt ){
 		'concat'
 	]);
 
-	grunt.registerTask( 'test' , function(){
+	grunt.registerTask('test', function() {
 		try {
-			grunt.task.requires( 'build' );
+			grunt.task.requires('build');
 		}
-		catch( err ){
-			grunt.task.run( 'build' );
+		catch(err) {
+			grunt.task.run('build');
 		}
-		grunt.task.run( 'mochaTest' );
+		grunt.task.run('mochaTest');
 	});
 
-	grunt.registerTask( 'debug' , [
+	grunt.registerTask('debug', [
 		'test',
 		'watch:debug'
 	]);

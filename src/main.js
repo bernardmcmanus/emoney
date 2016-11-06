@@ -11,98 +11,98 @@ import {
 	dispelParser
 } from 'argument-parsers';
 
-export default function E$( seed ){
+export default function E$(seed) {
 	var that = this;
 	if (that == $global || that == UNDEFINED) {
-		return new E$( seed );
+		return new E$(seed);
 	}
-	_.each( seed , function( value , key ){
+	_.each(seed, function(value, key) {
 		that[key] = value;
 	});
 	var listeners = new ListenerManager(),
 		descriptors = {
 			$__listeners: { value: listeners },
-			$__handleWild: { value: function(){
-				var args = _.toArray( arguments ),
+			$__handleWild: { value: function() {
+				var args = _.toArray(arguments),
 					evt = args.shift();
-				listeners.invoke( evt , args );
+				listeners.invoke(evt, args);
 			}},
 			handleE$: {
-				value: (that.handleE$ || function(){}).bind( that )
+				value: (that.handleE$ || function() {}).bind(that)
 			},
 		};
-	_.each( descriptors , function( descriptor ){
+	_.each(descriptors, function(descriptor) {
 		descriptor.configurable = true;
 	});
-	Object.defineProperties( that , descriptors );
+	Object.defineProperties(that, descriptors);
 }
 
-E$.is = function( subject ) {
-	return !!subject && _.isObject( subject ) && _.isFunction( subject.handleE$ );
+E$.is = function(subject) {
+	return !!subject && _.isObject(subject) && _.isFunction(subject.handleE$);
 };
 
 E$.prototype = {
 	constructor: E$,
-	$watch: function( emitters ){
+	$watch: function(emitters) {
 		var that = this;
-		emitters = [].concat( emitters );
-		_.each( emitters , function( emitter , key ){
+		emitters = [].concat(emitters);
+		_.each(emitters, function(emitter, key) {
 			emitter
-				.$when( WILDCARD , that )
-				.$when( WILDCARD , that.$__handleWild );
+				.$when(WILDCARD, that)
+				.$when(WILDCARD, that.$__handleWild);
 		});
 		return that;
 	},
-	$unwatch: function( emitters ){
+	$unwatch: function(emitters) {
 		var that = this;
-		emitters = [].concat( emitters );
-		_.each( emitters , function( emitter ){
+		emitters = [].concat(emitters);
+		_.each(emitters, function(emitter) {
 			emitter
-				.$dispel( WILDCARD , true , that )
-				.$dispel( WILDCARD , true , that.$__handleWild );
+				.$dispel(WILDCARD, true, that)
+				.$dispel(WILDCARD, true, that.$__handleWild);
 		});
 		return that;
 	},
-	$once: function(){
+	$once: function() {
 		var that = this,
 			called;
-		whenParser( that , arguments , function( eventTypes , listenerArgs , listenerFn ){
-			that.$when( eventTypes , listenerArgs , function once(){
+		whenParser(that, arguments, function(eventTypes, listenerArgs, listenerFn) {
+			that.$when(eventTypes, listenerArgs, function once() {
 				if (!called) {
 					called = true;
-					listenerFn.apply( UNDEFINED , arguments );
-					that.$dispel( eventTypes , true , once );
+					listenerFn.apply(UNDEFINED, arguments);
+					that.$dispel(eventTypes, true, once);
 				}
 			});
 		});
 		return that;
 	},
-	$when: function(){
+	$when: function() {
 		var that = this;
-		whenParser( that , arguments , function( eventTypes , listenerArgs , listenerFn ){
-			that.$__listeners.add( eventTypes , listenerFn , listenerArgs );
+		whenParser(that, arguments, function(eventTypes, listenerArgs, listenerFn) {
+			that.$__listeners.add(eventTypes, listenerFn, listenerArgs);
 		});
 		return that;
 	},
-	$emit: function(){
+	$emit: function() {
 		var that = this;
-		emitParser( that , arguments , function( eventTypes , listenerArgs , emitCb ){
-			_.each( eventTypes , function( type ){
-				var evt = new Event( that , type );
-				that.$__listeners.invoke( evt , listenerArgs );
-				stack.digest(function(){
-					if (_.isFunction( emitCb ) && !evt.defaultPrevented) {
-						emitCb.apply( UNDEFINED , [].concat( evt , listenerArgs ));
+		emitParser(that, arguments, function(eventTypes, listenerArgs, emitCb) {
+			_.each(eventTypes, function(type) {
+				var evt = new Event(that, type);
+				that.$__listeners.invoke(evt, listenerArgs);
+				stack.digest(function() {
+					if (_.isFunction(emitCb) && !evt.defaultPrevented) {
+						emitCb.apply(UNDEFINED, [].concat(evt, listenerArgs));
 					}
 				});
 			});
 		});
 		return that;
 	},
-	$dispel: function(){
+	$dispel: function() {
 		var that = this;
-		dispelParser( that , arguments , function( eventTypes , wild , listenerFn ){
-			that.$__listeners.remove( eventTypes , listenerFn , wild );
+		dispelParser(that, arguments, function(eventTypes, wild, listenerFn) {
+			that.$__listeners.remove(eventTypes, listenerFn, wild);
 		});
 		return that;
 	}
